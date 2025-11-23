@@ -1,8 +1,8 @@
-version: '3'
+version: "3"
 
 vars:
-  EWW_DIR: '{{.PWD}}'
-  RUST_APPLETS: '{{.EWW_DIR}}/rust-applets'
+  EWW_DIR: "{{.PWD}}"
+  RUST_APPLETS: "{{.EWW_DIR}}/rust-applets"
 
 tasks:
   # ============================================================================
@@ -25,183 +25,171 @@ tasks:
       - build:workspaces
       - build:window-title
       - build:pomodoro
-      - build:volume-mixer
-      - build:microphone-mixer
+      - build:mixer
       - build:music-daemon
 
   build:battery:
     desc: Build battery monitor
-    dir: '{{.RUST_APPLETS}}/eww-battery'
+    dir: "{{.RUST_APPLETS}}/eww-battery"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-battery'
+      - "target/release/eww-battery"
     cmds:
       - cargo build --release
 
   build:workspaces:
     desc: Build workspaces monitor
-    dir: '{{.RUST_APPLETS}}/eww-workspaces'
+    dir: "{{.RUST_APPLETS}}/eww-workspaces"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-workspaces'
+      - "target/release/eww-workspaces"
     cmds:
       - cargo build --release
 
   build:window-title:
     desc: Build window title monitor
-    dir: '{{.RUST_APPLETS}}/eww-window-title'
+    dir: "{{.RUST_APPLETS}}/eww-window-title"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-window-title'
+      - "target/release/eww-window-title"
     cmds:
       - cargo build --release
 
   build:pomodoro:
     desc: Build pomodoro timer
-    dir: '{{.RUST_APPLETS}}/eww-pomodoro'
+    dir: "{{.RUST_APPLETS}}/eww-pomodoro"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-pomodoro'
+      - "target/release/eww-pomodoro"
     cmds:
       - cargo build --release
 
-  build:volume-mixer:
-    desc: Build volume mixer
-    dir: '{{.RUST_APPLETS}}/eww-volume-mixer'
+  build:mixer:
+    desc: Build unified audio mixer (volume + microphone)
+    dir: "{{.RUST_APPLETS}}/eww-mixer"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-volume-mixer'
-    cmds:
-      - cargo build --release
-
-  build:microphone-mixer:
-    desc: Build microphone mixer
-    dir: '{{.RUST_APPLETS}}/eww-microphone-mixer'
-    sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
-    generates:
-      - 'target/release/eww-microphone-mixer'
+      - "target/release/eww-mixer"
     cmds:
       - cargo build --release
 
   build:music-daemon:
     desc: Build music daemon
-    dir: '{{.RUST_APPLETS}}/eww-music-daemon'
+    dir: "{{.RUST_APPLETS}}/eww-music-daemon"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-music-daemon'
+      - "target/release/eww-music-daemon"
     cmds:
       - cargo build --release
 
   build:bluetooth:
     desc: Build bluetooth monitor
-    dir: '{{.RUST_APPLETS}}/eww-bluetooth'
+    dir: "{{.RUST_APPLETS}}/eww-bluetooth"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-bluetooth'
+      - "target/release/eww-bluetooth"
     cmds:
       - cargo build --release
 
   build:brightness:
     desc: Build brightness monitor
-    dir: '{{.RUST_APPLETS}}/eww-brightness'
+    dir: "{{.RUST_APPLETS}}/eww-brightness"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-brightness'
+      - "target/release/eww-brightness"
     cmds:
       - cargo build --release
 
   build:keyboard:
     desc: Build keyboard layout monitor
-    dir: '{{.RUST_APPLETS}}/eww-keyboard'
+    dir: "{{.RUST_APPLETS}}/eww-keyboard"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-keyboard'
+      - "target/release/eww-keyboard"
     cmds:
       - cargo build --release
 
   build:network:
     desc: Build network monitor
-    dir: '{{.RUST_APPLETS}}/eww-network'
+    dir: "{{.RUST_APPLETS}}/eww-network"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-network'
+      - "target/release/eww-network"
     cmds:
       - cargo build --release
 
   build:notifications:
     desc: Build notifications monitor
-    dir: '{{.RUST_APPLETS}}/eww-notifications'
+    dir: "{{.RUST_APPLETS}}/eww-notifications"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-notifications'
+      - "target/release/eww-notifications"
     cmds:
       - cargo build --release
 
   build:power:
     desc: Build power menu
-    dir: '{{.RUST_APPLETS}}/eww-power'
+    dir: "{{.RUST_APPLETS}}/eww-power"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-power'
+      - "target/release/eww-power"
     cmds:
       - cargo build --release
 
   build:updates:
     desc: Build updates monitor
-    dir: '{{.RUST_APPLETS}}/eww-updates'
+    dir: "{{.RUST_APPLETS}}/eww-updates"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-updates'
+      - "target/release/eww-updates"
     cmds:
       - cargo build --release
 
   build:user-info:
     desc: Build user info widget
-    dir: '{{.RUST_APPLETS}}/eww-user-info'
+    dir: "{{.RUST_APPLETS}}/eww-user-info"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-user-info'
+      - "target/release/eww-user-info"
     cmds:
       - cargo build --release
 
   build:weather:
     desc: Build weather widget
-    dir: '{{.RUST_APPLETS}}/eww-weather'
+    dir: "{{.RUST_APPLETS}}/eww-weather"
     sources:
-      - 'src/**/*.rs'
-      - 'Cargo.toml'
+      - "src/**/*.rs"
+      - "Cargo.toml"
     generates:
-      - 'target/release/eww-weather'
+      - "target/release/eww-weather"
     cmds:
       - cargo build --release
 
@@ -246,12 +234,10 @@ tasks:
     cmds:
       - eww kill || true
       - pkill -f 'eww-pomodoro daemon' || true
-      - pkill -f 'volume-daemon.py' || true
-      - pkill -f 'microphone-daemon.py' || true
+      - pkill -f 'eww-mixer listen' || true
       - pkill -f 'eww-music-daemon' || true
       - rm -f /tmp/eww-pomodoro.sock || true
-      - rm -f /tmp/eww-volume-mixer.sock || true
-      - rm -f /tmp/eww-microphone-mixer.sock || true
+      - rm -f /tmp/eww-mixer.sock || true
       - echo "✓ EWW and all daemons killed"
 
   logs:
@@ -311,27 +297,32 @@ tasks:
   test:battery:
     desc: Test battery monitor
     cmds:
-      - '{{.RUST_APPLETS}}/eww-battery/target/release/eww-battery | jq'
+      - "{{.RUST_APPLETS}}/eww-battery/target/release/eww-battery | jq"
 
   test:workspaces:
     desc: Test workspaces monitor (Ctrl+C to stop)
     cmds:
-      - '{{.RUST_APPLETS}}/eww-workspaces/target/release/eww-workspaces'
+      - "{{.RUST_APPLETS}}/eww-workspaces/target/release/eww-workspaces"
 
   test:window-title:
     desc: Test window title monitor (Ctrl+C to stop)
     cmds:
-      - '{{.RUST_APPLETS}}/eww-window-title/target/release/eww-window-title listen'
+      - "{{.RUST_APPLETS}}/eww-window-title/target/release/eww-window-title listen"
 
   test:pomodoro:
     desc: Test pomodoro timer (Ctrl+C to stop)
     cmds:
-      - '{{.RUST_APPLETS}}/eww-pomodoro/target/release/eww-pomodoro listen'
+      - "{{.RUST_APPLETS}}/eww-pomodoro/target/release/eww-pomodoro listen"
+
+  test:mixer:
+    desc: Test unified mixer (Ctrl+C to stop)
+    cmds:
+      - "{{.RUST_APPLETS}}/eww-mixer/target/release/eww-mixer listen | jq"
 
   test:music:
     desc: Test music daemon (Ctrl+C to stop)
     cmds:
-      - '{{.RUST_APPLETS}}/eww-music-daemon/target/release/eww-music-daemon listen'
+      - "{{.RUST_APPLETS}}/eww-music-daemon/target/release/eww-music-daemon listen"
 
   # ============================================================================
   # UTILITY TASKS
@@ -357,25 +348,16 @@ tasks:
           echo "✗ Pomodoro daemon: not running"
         fi
 
+        if pgrep -f 'eww-mixer listen' > /dev/null; then
+          echo "✓ Unified Mixer daemon: running"
+        else
+          echo "✗ Unified Mixer daemon: not running"
+        fi
+
         if pgrep -f 'eww-music-daemon' > /dev/null; then
           echo "✓ Music daemon: running"
         else
           echo "✗ Music daemon: not running"
-        fi
-
-        echo ""
-        echo "=== Python Daemon Status ==="
-
-        if pgrep -f 'volume-daemon.py' > /dev/null; then
-          echo "✓ Volume daemon: running"
-        else
-          echo "✗ Volume daemon: not running"
-        fi
-
-        if pgrep -f 'microphone-daemon.py' > /dev/null; then
-          echo "✓ Microphone daemon: running"
-        else
-          echo "✗ Microphone daemon: not running"
         fi
 
   default:

@@ -79,13 +79,14 @@
   :initial '{"present":false,"percent":0,"status":"N/A","time":"","power":0,"icon":"","health":0,"cycles":0,"voltage":"0.0V","temp":0,"design_capacity":"N/A","current_capacity":"N/A"}'
   "~/.config/eww/rust-applets/eww-battery/target/release/eww-battery listen")
 
-(deflisten volume
-  :initial '{"percent": 0, "muted": false, "level": 0}'
-  "bash -c '~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer daemon & sleep 0.5; ~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer listen'")
+;; ============================================================================
+;; UNIFIED MIXER - Handles both volume and microphone
+;; ============================================================================
+(deflisten mixer_state
+  :initial '{"volume_percent":0,"volume_muted":false,"volume_level":0,"sinks":[],"sink_inputs":[],"mic_percent":0,"mic_muted":false,"mic_level":0,"sources":[],"source_outputs":[]}'
+  "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer listen")
 
-(deflisten microphone
-  :initial '{"percent": 0, "muted": false, "level": 0}'
-  "bash -c '~/.config/eww/rust-applets/eww-microphone-mixer/target/release/eww-microphone-mixer daemon & sleep 0.5; ~/.config/eww/rust-applets/eww-microphone-mixer/target/release/eww-microphone-mixer listen'")
+;; Derived data for widgets (extracted from mixer_state in eww.yuck using jq)
 
 (defpoll network
   :interval "5s"
@@ -124,14 +125,6 @@
   :initial '{"official": 0, "aur": 0, "total": 0, "icon": ""}'
   "~/.config/eww/rust-applets/eww-updates/target/release/eww-updates")
 
-(deflisten mixer
-  :initial '{"sinks": [], "sink_inputs": []}'
-  "~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer listen")
-
-(deflisten mic_mixer
-  :initial '{"sources": [], "source_outputs": []}'
-  "~/.config/eww/rust-applets/eww-microphone-mixer/target/release/eww-microphone-mixer listen")
-
 ;; ============================================================================
 ;; DASHBOARD DATA SOURCES
 ;; ============================================================================
@@ -144,6 +137,7 @@
 (deflisten music
   :initial '{"active_player": "No Player", "active_bus": "", "available_players": [], "next_player": "", "prev_player": "", "title": "", "artist": "", "album": "", "art_url": "", "playing": false, "status": "Stopped", "position_percent": 0, "position_time": "0:00", "duration_time": "0:00", "volume": 0.0, "can_play": false, "can_pause": false, "can_go_next": false, "can_go_previous": false, "can_seek": false, "shuffle": false, "loop_status": "None", "playback_rate": 1.0}'
   "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon listen")
+
 ;; Dashboard visibility toggle
 (defvar show-dashboard false)
 
