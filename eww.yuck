@@ -240,9 +240,9 @@
 
 (defwidget pomodoro-widget []
   (eventbox
-    :onclick "~/.config/eww/scripts/pomodoro.py toggle &"
-    :onrightclick "~/.config/eww/scripts/pomodoro.py stop &"
-    :onmiddleclick "~/.config/eww/scripts/pomodoro.py skip &"
+    :onclick "~/.config/eww/rust-applets/eww-pomodoro/target/release/eww-pomodoro toggle &"
+    :onrightclick "~/.config/eww/rust-applets/eww-pomodoro/target/release/eww-pomodoro stop &"
+    :onmiddleclick "~/.config/eww/rust-applets/eww-pomodoro/target/release/eww-pomodoro skip &"
     :cursor "pointer"
     (box
       :class "pomodoro-applet ${pomodoro.status} ${pomodoro.is_break == true ? 'break' : ''}"
@@ -259,7 +259,7 @@
 
 (defwidget brightness-widget []
   (eventbox
-    :onscroll "if [ '{}' = 'up' ]; then ~/.config/eww/scripts/brightness.sh up; else ~/.config/eww/scripts/brightness.sh down; fi"
+    :onscroll "if [ '{}' = 'up' ]; then ~/.config/eww/rust-applets/eww-brightness/target/release/eww-brightness up; else ~/.config/eww/rust-applets/eww-brightness/target/release/eww-brightness down; fi"
     :cursor "pointer"
     (box
       :class "brightness-applet ${brightness.percent <= 10 ? 'very-low' : ''}"
@@ -308,9 +308,9 @@
 
 (defwidget microphone-widget []
   (eventbox
-    :onscroll "if [ '{}' = 'up' ]; then ~/.config/eww/scripts/microphone.sh up; else ~/.config/eww/scripts/microphone.sh down; fi"
+    :onscroll "~/.config/eww/rust-applets/eww-microphone-mixer/target/release/eww-microphone-mixer volume-{}"
     :cursor "pointer"
-    :onclick "~/.config/eww/scripts/microphone.sh toggle"
+    :onclick "~/.config/eww/rust-applets/eww-microphone-mixer/target/release/eww-microphone-mixer toggle-mute-default"
     :onrightclick "eww open microphone-mixer --toggle"
     (box
       :class "microphone-applet ${microphone.muted ? 'muted' : ''}"
@@ -328,9 +328,9 @@
 
 (defwidget volume-widget []
   (eventbox
-    :onscroll "if [ '{}' = 'up' ]; then ~/.config/eww/scripts/volume.sh up; else ~/.config/eww/scripts/volume.sh down; fi"
+    :onscroll "~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer volume-{}"
     :cursor "pointer"
-    :onclick "~/.config/eww/scripts/volume.sh toggle"
+    :onclick "~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer toggle-mute-default"
     :onrightclick "eww open volume-mixer --toggle"
     (box
       :class "volume-applet ${volume.muted ? 'muted' : ''}"
@@ -464,7 +464,7 @@
       (eventbox
         :cursor "pointer"
         ;; UPDATED: Uses toggle-mute-sink
-        :onclick "~/.config/eww/scripts/volume-manager.sh toggle-mute-sink ${sink.index}"
+        :onclick "~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer toggle-mute-sink ${sink.index}"
         (label :class "mixer-icon" :text "${sink.muted ? '󰖁' : '󰕾'}")
       )
       (label :class "mixer-name" :text "${sink.description}" :limit-width 30 :halign "start")
@@ -476,7 +476,7 @@
       :min 0
       :max 150
       ;; UPDATED: Uses set-sink-volume with correct arg order
-      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/scripts/volume-manager.sh set-sink-volume ${sink.index} $vol'"
+      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer set-sink-volume ${sink.index} $vol'"
     )
     (box
       :visible "${!sink.is_default}"
@@ -486,7 +486,7 @@
         (button
           :class "set-default-btn"
           ;; UPDATED: Uses set-default-sink
-          :onclick "~/.config/eww/scripts/volume-manager.sh set-default-sink \"${sink.name}\""
+          :onclick "~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer set-default-sink \"${sink.name}\""
           "Set as Default")
       )
     )
@@ -506,7 +506,7 @@
       (eventbox
         :cursor "pointer"
         ;; UPDATED: Uses toggle-mute-sink-input
-        :onclick "~/.config/eww/scripts/volume-manager.sh toggle-mute-sink-input ${app.index}"
+        :onclick "~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer toggle-mute-sink-input ${app.index}"
         (label :class "mixer-icon" :text "${app.muted ? '󰖁' : '󰕾'}")
       )
       (label :class "mixer-name" :text "${app.name}" :limit-width 30 :halign "start")
@@ -518,7 +518,7 @@
       :min 0
       :max 150
       ;; UPDATED: Uses set-sink-input-volume
-      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/scripts/volume-manager.sh set-sink-input-volume ${app.index} $vol'"
+      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer set-sink-input-volume ${app.index} $vol'"
     )
   )
 )
@@ -628,7 +628,7 @@
       :spacing 8
       (eventbox
         :cursor "pointer"
-        :onclick "~/.config/eww/scripts/microphone-manager.sh toggle-mute-source ${source.index}"
+        :onclick "~/.config/eww/rust-applets/eww-microphone-mixer/target/release/eww-microphone-mixer toggle-mute-source ${source.index}"
         :tooltip "${source.muted ? 'Unmute' : 'Mute'}"
         (label
           :class "mixer-icon mic-icon"
@@ -652,7 +652,7 @@
       :value "${source.volume}"
       :min 0
       :max 150
-      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/scripts/microphone-manager.sh set-source-volume ${source.index} $vol'"
+      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/rust-applets/eww-microphone-mixer/target/release/eww-microphone-mixer set-source-volume ${source.index} $vol'"
       :tooltip "Volume: ${source.volume}%"
     )
 
@@ -679,7 +679,7 @@
           :cursor "pointer"
           (button
             :class "set-default-btn mic-set-default-btn"
-            :onclick "~/.config/eww/scripts/microphone-manager.sh set-default-source \"${source.name}\""
+            :onclick "~/.config/eww/rust-applets/eww-microphone-mixer/target/release/eww-microphone-mixer set-default-source \"${source.name}\""
             :tooltip "Make this the default input device"
             "Set as Default")
         )
@@ -703,7 +703,7 @@
       :spacing 8
       (eventbox
         :cursor "pointer"
-        :onclick "~/.config/eww/scripts/microphone-manager.sh toggle-mute-source-output ${app.index}"
+        :onclick "~/.config/eww/rust-applets/eww-microphone-mixer/target/release/eww-microphone-mixer toggle-mute-source-output ${app.index}"
         :tooltip "${app.muted ? 'Unmute' : 'Mute'}"
         (label
           :class "mixer-icon mic-icon"
@@ -727,7 +727,7 @@
       :value "${app.volume}"
       :min 0
       :max 150
-      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/scripts/microphone-manager.sh set-source-output-volume ${app.index} $vol'"
+      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/rust-applets/eww-microphone-mixer/target/release/eww-microphone-mixer set-source-output-volume ${app.index} $vol'"
       :tooltip "Volume: ${app.volume}%"
     )
   )

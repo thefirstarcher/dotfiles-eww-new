@@ -37,6 +37,9 @@ enum CliCommand {
     SetDefaultSource { source_name: String },
     MuteSource { source_index: u32, mute: bool },
     ToggleMuteSource { source_index: u32 },
+    ToggleMuteDefault,
+    VolumeUp,
+    VolumeDown,
     MuteSourceOutput { index: u32, mute: bool },
     ToggleMuteSourceOutput { index: u32 },
     Kill,
@@ -253,8 +256,11 @@ impl AudioBackend for PulseAudioClient {
             thread::sleep(Duration::from_millis(5));
         }
 
-        let sources_vec = sources.lock().unwrap().clone();
+        let mut sources_vec = sources.lock().unwrap().clone();
         let outputs_vec = source_outputs.lock().unwrap().clone();
+
+        // Sort sources: default/active first, then others
+        sources_vec.sort_by(|a, b| b.is_default.cmp(&a.is_default));
 
         Ok(MicMixerState {
             sources: sources_vec,
@@ -519,6 +525,32 @@ fn run_daemon<B: AudioBackend + 'static>(socket_path: &str, backend: B) -> anyho
                             }
                             CliCommand::ToggleMuteSourceOutput { index } => {
                                 client.lock().unwrap().toggle_output_mute(index);
+                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
+                            }
+                            CliCommand::ToggleMuteDefault => {
+                                if let Ok(state) = client.lock().unwrap().get_state() {
+                                    if let Some(default_source) = state.sources.iter().find(|s| s.is_default) {
+                                        client.lock().unwrap().toggle_source_mute(default_source.index);
+                                    }
+                                }
+                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
+                            }
+                            CliCommand::VolumeUp => {
+                                if let Ok(state) = client.lock().unwrap().get_state() {
+                                    if let Some(default_source) = state.sources.iter().find(|s| s.is_default) {
+                                        let new_vol = (default_source.volume + 5).min(100);
+                                        client.lock().unwrap().set_source_volume(default_source.index, new_vol);
+                                    }
+                                }
+                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
+                            }
+                            CliCommand::VolumeDown => {
+                                if let Ok(state) = client.lock().unwrap().get_state() {
+                                    if let Some(default_source) = state.sources.iter().find(|s| s.is_default) {
+                                        let new_vol = default_source.volume.saturating_sub(5);
+                                        client.lock().unwrap().set_source_volume(default_source.index, new_vol);
+                                    }
+                                }
                                 let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
                             }
                             CliCommand::SetDefaultSource { source_name } => {

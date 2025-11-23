@@ -59,11 +59,11 @@
 
 (deflisten workspaces
   :initial "[]"
-  "~/.config/eww/scripts/workspaces.sh")
+  "~/.config/eww/rust-applets/eww-workspaces/target/release/eww-workspaces")
 
 (deflisten window_title
   :initial '{"title": ""}'
-  "~/.config/eww/scripts/window-title.sh listen")
+  "~/.config/eww/rust-applets/eww-window-title/target/release/eww-window-title listen")
 
 (defpoll time
   :interval "1s"
@@ -75,63 +75,62 @@
   :initial "Day, 01 Month"
   "date '+%A, %d %B'")
 
-(defpoll battery
-  :interval "10s"
+(deflisten battery
   :initial '{"present":false,"percent":0,"status":"N/A","time":"","power":0,"icon":"","health":0,"cycles":0,"voltage":"0.0V","temp":0,"design_capacity":"N/A","current_capacity":"N/A"}'
-  "~/.config/eww/scripts/battery.sh")
+  "~/.config/eww/rust-applets/eww-battery/target/release/eww-battery listen")
 
 (deflisten volume
   :initial '{"percent": 0, "muted": false, "level": 0}'
-  "~/.config/eww/scripts/volume-daemon.py")
+  "bash -c '~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer daemon & sleep 0.5; ~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer listen'")
 
 (deflisten microphone
   :initial '{"percent": 0, "muted": false, "level": 0}'
-  "~/.config/eww/scripts/microphone-daemon.py")
+  "bash -c '~/.config/eww/rust-applets/eww-microphone-mixer/target/release/eww-microphone-mixer daemon & sleep 0.5; ~/.config/eww/rust-applets/eww-microphone-mixer/target/release/eww-microphone-mixer listen'")
 
 (defpoll network
   :interval "5s"
   :initial '{"type": "disconnected", "icon": "󰤭", "name": "", "percent": 0}'
-  "~/.config/eww/scripts/network.sh")
+  "~/.config/eww/rust-applets/eww-network/target/release/eww-network")
 
 (defpoll bluetooth
   :interval "5s"
   :initial '{"enabled": false, "connected": false, "device": ""}'
-  "~/.config/eww/scripts/bluetooth.sh")
+  "~/.config/eww/rust-applets/eww-bluetooth/target/release/eww-bluetooth")
 
 (defpoll notifications
   :interval "5s"
   :initial '{"count": 0, "dnd": false}'
-  "~/.config/eww/scripts/notifications.sh")
+  "~/.config/eww/rust-applets/eww-notifications/target/release/eww-notifications")
 
 (defpoll weather
   :interval "1800s"
   :initial '{"temp": "", "condition": "", "icon": ""}'
-  "~/.config/eww/scripts/weather.sh")
+  "~/.config/eww/rust-applets/eww-weather/target/release/eww-weather")
 
 (deflisten brightness
   :initial '{"percent": 0}'
-  "~/.config/eww/scripts/brightness.sh listen")
+  "~/.config/eww/rust-applets/eww-brightness/target/release/eww-brightness listen")
 
 (deflisten keyboard
   :initial '{"layout": "us", "icon": "🇺🇸"}'
-  "~/.config/eww/scripts/keyboard.sh listen")
+  "~/.config/eww/rust-applets/eww-keyboard/target/release/eww-keyboard listen")
 
 (deflisten pomodoro
-  :initial '{"status":"idle","time_left":1500,"time_display":"25:00","sessions":0,"is_break":false,"icon":"","percent":0,"duration":1500}'
-  "~/.config/eww/scripts/pomodoro.py listen")
+  :initial '{"status":"idle","time_left":1500,"time_display":"25:00","sessions":0,"is_break":false,"icon":"","percent":0}'
+  "~/.config/eww/rust-applets/eww-pomodoro/target/release/eww-pomodoro listen")
 
 (defpoll updates
   :interval "1800s"
   :initial '{"official": 0, "aur": 0, "total": 0, "icon": ""}'
-  "~/.config/eww/scripts/updates.sh")
+  "~/.config/eww/rust-applets/eww-updates/target/release/eww-updates")
 
 (deflisten mixer
   :initial '{"sinks": [], "sink_inputs": []}'
-  "~/.config/eww/scripts/volume-manager.sh listen")
+  "~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer listen")
 
 (deflisten mic_mixer
   :initial '{"sources": [], "source_outputs": []}'
-  "~/.config/eww/scripts/microphone-manager.sh listen")
+  "~/.config/eww/rust-applets/eww-microphone-mixer/target/release/eww-microphone-mixer listen")
 
 ;; ============================================================================
 ;; DASHBOARD DATA SOURCES
@@ -140,7 +139,7 @@
 (defpoll user_info
   :interval "10s"
   :initial '{"username":"user","uptime_days":"0 days","uptime_hours":"0 hours","uptime_minutes":"0 minutes"}'
-  "~/.config/eww/scripts/user-info.sh")
+  "~/.config/eww/rust-applets/eww-user-info/target/release/eww-user-info")
 
 (deflisten music
   :initial '{"active_player": "No Player", "active_bus": "", "available_players": [], "next_player": "", "prev_player": "", "title": "", "artist": "", "album": "", "art_url": "", "playing": false, "status": "Stopped", "position_percent": 0, "position_time": "0:00", "duration_time": "0:00", "volume": 0.0, "can_play": false, "can_pause": false, "can_go_next": false, "can_go_previous": false, "can_seek": false, "shuffle": false, "loop_status": "None", "playback_rate": 1.0}'

@@ -38,6 +38,9 @@ enum CliCommand {
     SetDefaultSink { sink_name: String },
     MuteSink { sink_index: u32, mute: bool },
     ToggleMuteSink { sink_index: u32 },
+    ToggleMuteDefault,
+    VolumeUp,
+    VolumeDown,
     MuteSinkInput { index: u32, mute: bool },
     ToggleMuteSinkInput { index: u32 },
     Kill,
@@ -259,8 +262,11 @@ impl AudioBackend for PulseAudioClient {
             thread::sleep(Duration::from_millis(5));
         }
 
-        let sinks_vec = sinks.lock().unwrap().clone();
+        let mut sinks_vec = sinks.lock().unwrap().clone();
         let inputs_vec = sink_inputs.lock().unwrap().clone();
+
+        // Sort sinks: default/active first, then others
+        sinks_vec.sort_by(|a, b| b.is_default.cmp(&a.is_default));
 
         Ok(MixerState {
             sinks: sinks_vec,
@@ -525,6 +531,32 @@ fn run_daemon<B: AudioBackend + 'static>(socket_path: &str, backend: B) -> anyho
                             }
                             CliCommand::ToggleMuteSinkInput { index } => {
                                 client.lock().unwrap().toggle_input_mute(index);
+                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
+                            }
+                            CliCommand::ToggleMuteDefault => {
+                                if let Ok(state) = client.lock().unwrap().get_state() {
+                                    if let Some(default_sink) = state.sinks.iter().find(|s| s.is_default) {
+                                        client.lock().unwrap().toggle_sink_mute(default_sink.index);
+                                    }
+                                }
+                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
+                            }
+                            CliCommand::VolumeUp => {
+                                if let Ok(state) = client.lock().unwrap().get_state() {
+                                    if let Some(default_sink) = state.sinks.iter().find(|s| s.is_default) {
+                                        let new_vol = (default_sink.volume + 5).min(100);
+                                        client.lock().unwrap().set_sink_volume(default_sink.index, new_vol);
+                                    }
+                                }
+                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
+                            }
+                            CliCommand::VolumeDown => {
+                                if let Ok(state) = client.lock().unwrap().get_state() {
+                                    if let Some(default_sink) = state.sinks.iter().find(|s| s.is_default) {
+                                        let new_vol = default_sink.volume.saturating_sub(5);
+                                        client.lock().unwrap().set_sink_volume(default_sink.index, new_vol);
+                                    }
+                                }
                                 let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
                             }
                             CliCommand::SetDefaultSink { sink_name } => {
