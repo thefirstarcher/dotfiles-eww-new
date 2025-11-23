@@ -30,13 +30,16 @@
   :monitor 0
   :geometry (geometry
     :x "10"
-    :y "60"
+    :y "55px"     ;; MOVED UP: Closer to bar (42px bar + 5px offset + 8px gap)
     :width "350px"
     :height "500px"
     :anchor "top left")
   :stacking "overlay"
   :exclusive false
-  (dashboard_layout)
+  ;; WRAPPER: Auto-close when mouse leaves the dashboard area
+  (eventbox
+    :onhoverlost "eww close dashboard && eww update show-dashboard=false"
+    (dashboard_layout))
 )
 
 ;; ============================================================================
@@ -430,11 +433,10 @@
 ;; Dashboard toggle button (in bar)
 (defwidget dashboard-toggle-button []
   (eventbox
-    :onclick "eww update show-dashboard=${!show-dashboard}"
+    :onclick "eww open --toggle dashboard && eww update show-dashboard=${!show-dashboard}"
     :cursor "pointer"
-    (button
-      :class "dashboard-toggle ${show-dashboard ? 'active' : ''}"
-      "")
+    :tooltip "Toggle Dashboard"
+    (button :class "dashboard-toggle ${show-dashboard ? 'active' : ''}" "󰍜")
   )
 )
 
@@ -445,8 +447,23 @@
     :orientation "v"
     :space-evenly false
     :spacing 12
-    (user-info-widget)
-    (music-player-widget)
+    ;; OVERLAY: Allows placing the close button on top of the content
+    (overlay
+      (box
+        :orientation "v"
+        :space-evenly false
+        :spacing 12
+        (user-info-widget)
+        (music-player-widget)
+      )
+      (button
+        :class "dashboard-close-btn"
+        :halign "end"
+        :valign "start"
+        :onclick "eww close dashboard && eww update show-dashboard=false"
+        :tooltip "Close Dashboard"
+        "󰅖")
+    )
   )
 )
 
@@ -483,92 +500,60 @@
     :orientation "v"
     :space-evenly false
     :spacing 12
-    ;; Main horizontal container
     (box
       :class "player-main-container"
       :orientation "h"
       :space-evenly false
-      :spacing 12
-      ;; Left section - Album art and switchers
+      :spacing 16
+      ;; Left: Art & Switcher
       (box
         :class "player-left-section"
         :orientation "v"
         :space-evenly false
-        :spacing 8
-        ;; Album art with app switcher buttons
+        :spacing 6
+        :valign "center"
         (box
           :class "album-section"
           :orientation "h"
           :space-evenly false
           :halign "center"
-          ;; Left switcher button
+          :valign "center"
+          ;; Left Switcher: Cycle to Previous Player
           (button
             :class "app-switcher-left"
-            :onclick "~/.config/eww/scripts/music-control.sh switch ${music.available_players[0] ?: ''}"
+            :onclick "~/.config/eww/scripts/music-control.sh prev_player"
             :visible "${arraylength(music.available_players) > 1}"
             "")
-          ;; Album art
-          (box
-            :class "album-art-container"
-            :visible "${music.art_url != ''}"
-            (image
-              :class "album-art"
-              :path "${music.art_url}"
-              :image-width 150
-              :image-height 150)
-          )
-          ;; Placeholder when no art
-          (box
-            :class "album-art-placeholder"
-            :visible "${music.art_url == ''}"
-            (label :text "" :class "placeholder-icon")
-          )
-          ;; Right switcher button
+
+          ;; Album Art (Background Image for cropping)
+          (box :class "album-art" :visible "${music.art_url != ''}" :style "background-image: url('${music.art_url}');")
+          (box :class "album-art-placeholder" :visible "${music.art_url == ''}" (label :text "" :class "placeholder-icon"))
+
+          ;; Right Switcher: Cycle to Next Player
           (button
             :class "app-switcher-right"
-            :onclick "~/.config/eww/scripts/music-control.sh switch ${music.available_players[1] ?: ''}"
+            :onclick "~/.config/eww/scripts/music-control.sh next_player"
             :visible "${arraylength(music.available_players) > 1}"
             "")
         )
-        ;; App name
-        (label
-          :class "player-name"
-          :text "${music.active_player}"
-          :halign "center")
+        (label :class "player-name" :text "${music.active_player}" :limit-width 15 :halign "center")
       )
-      ;; Right section - Seek and controls
+      ;; Right: Controls
       (box
         :class "player-right-section"
         :orientation "v"
         :space-evenly false
-        :spacing 12
         :valign "center"
-        ;; Seek bar
-        (scale
-          :class "seek-bar"
-          :value "${music.position_percent}"
-          :onchange "~/.config/eww/scripts/music-control.sh seek {}"
-          :min 0
-          :max 100)
-        ;; Control buttons
+        (scale :class "seek-bar" :value "${music.position_percent}" :onchange "~/.config/eww/scripts/music-control.sh seek {}" :min 0 :max 100)
         (box
           :class "player-controls"
           :orientation "h"
           :space-evenly false
-          :spacing 12
+          :spacing 20
           :halign "center"
-          (button
-            :class "control-button"
-            :onclick "~/.config/eww/scripts/music-control.sh previous"
-            "")
-          (button
-            :class "control-button"
-            :onclick "~/.config/eww/scripts/music-control.sh playpause"
-            "${music.playing ? '' : ''}")
-          (button
-            :class "control-button"
-            :onclick "~/.config/eww/scripts/music-control.sh next"
-            "")
+          (button :class "control-button" :onclick "~/.config/eww/scripts/music-control.sh previous" "󰒮")
+          (button :class "control-button main" :onclick "~/.config/eww/scripts/music-control.sh playpause" "${music.playing ? '󰏤' : '󰐊'}")
+          (button :class "control-button" :onclick "~/.config/eww/scripts/music-control.sh next" "󰒭")
         )
       )
     )

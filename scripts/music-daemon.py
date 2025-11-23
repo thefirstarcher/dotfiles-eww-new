@@ -3,17 +3,49 @@
 # Music Player Daemon for EWW Dashboard
 # ============================================================================
 # Monitors MPRIS players via playerctl and allows switching between them
+# Uses Event-based updates via SIGUSR1 for instant response
 
 import subprocess
 import json
 import time
 import os
 import sys
+import signal
+import threading
+
+# File paths
+PID_FILE = "/tmp/eww-music-daemon.pid"
+SWITCH_FILE = "/tmp/eww-music-player-switch"
 
 class MusicDaemon:
     def __init__(self):
         self.active_player = None
-        self.switch_file = '/tmp/eww-music-player-switch'
+        # Event to wake up the main loop
+        self.update_event = threading.Event()
+
+        # Write PID to file so control script can signal us specifically
+        try:
+            with open(PID_FILE, 'w') as f:
+                f.write(str(os.getpid()))
+        except Exception as e:
+            print(f"Error writing PID file: {e}", file=sys.stderr)
+
+        # Setup signal handler for instant updates (SIGUSR1)
+        # This prevents the "User defined signal 1" crash
+        signal.signal(signal.SIGUSR1, self.handle_signal)
+
+    def cleanup(self):
+        """Remove PID file on exit"""
+        if os.path.exists(PID_FILE):
+            try:
+                os.remove(PID_FILE)
+            except:
+                pass
+
+    def handle_signal(self, signum, frame):
+        """Handle signal to trigger immediate update"""
+        # wake up the loop immediately
+        self.update_event.set()
 
     def get_players(self):
         """Get list of available MPRIS players"""
@@ -25,13 +57,15 @@ class MusicDaemon:
                 timeout=2
             )
             players = result.stdout.strip().split('\n') if result.stdout.strip() else []
-            return [p for p in players if p]  # Filter empty strings
+            # Filter empty strings
+            return [p for p in players if p]
         except Exception:
             return []
 
     def get_metadata(self, player):
         """Get metadata for a specific player"""
         try:
+            # Use a custom format to get everything in one go
             result = subprocess.run(
                 ['playerctl', '-p', player, 'metadata', '--format',
                  '{{title}}|||{{artist}}|||{{mpris:artUrl}}'],
@@ -49,11 +83,10 @@ class MusicDaemon:
             # Strip file:// prefix and validate
             if art_url.startswith('file://'):
                 file_path = art_url.replace('file://', '')
-                # Check if file exists
                 if os.path.exists(file_path):
-                    art_url = file_path  # Use path without file:// prefix
+                    art_url = file_path
                 else:
-                    art_url = ""  # File doesn't exist, clear it
+                    art_url = ""
 
             return {
                 'title': parts[0] if len(parts) > 0 else "",
@@ -64,7 +97,6 @@ class MusicDaemon:
             return None
 
     def get_playback_status(self, player):
-        """Get playback status for a player"""
         try:
             result = subprocess.run(
                 ['playerctl', '-p', player, 'status'],
@@ -77,7 +109,6 @@ class MusicDaemon:
             return False
 
     def get_position(self, player):
-        """Get position percentage for a player"""
         try:
             pos_result = subprocess.run(
                 ['playerctl', '-p', player, 'position'],
@@ -85,7 +116,6 @@ class MusicDaemon:
                 text=True,
                 timeout=1
             )
-
             dur_result = subprocess.run(
                 ['playerctl', '-p', player, 'metadata', 'mpris:length'],
                 capture_output=True,
@@ -93,8 +123,18 @@ class MusicDaemon:
                 timeout=1
             )
 
-            pos = float(pos_result.stdout.strip())
-            dur = int(dur_result.stdout.strip()) / 1000000  # Convert microseconds to seconds
+            # Parse position
+            try:
+                pos = float(pos_result.stdout.strip())
+            except ValueError:
+                pos = 0
+
+            # Parse duration
+            try:
+                dur_micros = int(dur_result.stdout.strip())
+                dur = dur_micros / 1000000
+            except ValueError:
+                dur = 0
 
             return int((pos / dur) * 100) if dur > 0 else 0
         except Exception:
@@ -102,19 +142,17 @@ class MusicDaemon:
 
     def check_switch_request(self):
         """Check if user requested to switch player"""
-        if os.path.exists(self.switch_file):
+        if os.path.exists(SWITCH_FILE):
             try:
-                with open(self.switch_file, 'r') as f:
+                with open(SWITCH_FILE, 'r') as f:
                     new_player = f.read().strip()
-                    os.remove(self.switch_file)
-                    return new_player
+                os.remove(SWITCH_FILE)
+                return new_player
             except Exception:
                 pass
         return None
 
     def get_state(self):
-        """Get current state of all players"""
-        # Get available players
         available_players = self.get_players()
 
         # Check for manual switch
@@ -122,60 +160,57 @@ class MusicDaemon:
         if switch_to and switch_to in available_players:
             self.active_player = switch_to
 
-        # Auto-select first player if none active
+        # Auto-select first player if none active or active lost
         if not self.active_player or self.active_player not in available_players:
             self.active_player = available_players[0] if available_players else None
 
-        # Build state object
         state = {
-            "active_player": self.active_player or "",
+            "active_player": self.active_player or "No Player",
             "available_players": available_players,
-            "title": "",
+            "title": "No Media",
             "artist": "",
             "art_url": "",
             "playing": False,
             "position_percent": 0
         }
 
-        # Get metadata for active player
         if self.active_player:
             metadata = self.get_metadata(self.active_player)
             if metadata:
                 state.update(metadata)
-
             state['playing'] = self.get_playback_status(self.active_player)
             state['position_percent'] = self.get_position(self.active_player)
 
         return state
 
     def run(self):
-        """Run daemon - output state continuously"""
-        while True:
-            try:
+        """Run daemon"""
+        try:
+            while True:
+                # 1. Get and output state
                 state = self.get_state()
                 print(json.dumps(state), flush=True)
-                time.sleep(1)
-            except KeyboardInterrupt:
-                break
-            except Exception as e:
-                # Output error state but keep running
-                error_state = {
-                    "active_player": "",
-                    "available_players": [],
-                    "title": "",
-                    "artist": "",
-                    "art_url": "",
-                    "playing": False,
-                    "position_percent": 0
-                }
-                print(json.dumps(error_state), flush=True)
-                time.sleep(1)
+
+                # 2. Wait for signal OR timeout
+                # If signal comes, wait returns true immediately -> Loop runs again -> Fast update
+                # If no signal, it waits 2 seconds then updates anyway
+                self.update_event.wait(timeout=2.0)
+                self.update_event.clear()
+
+        except KeyboardInterrupt:
+            pass
+        except Exception as e:
+            # Last ditch error catching
+            error_state = {"active_player": "Error", "title": str(e)}
+            print(json.dumps(error_state), flush=True)
+        finally:
+            self.cleanup()
 
 if __name__ == "__main__":
+    # Mode selection
     if len(sys.argv) > 1 and sys.argv[1] == "listen":
         daemon = MusicDaemon()
         daemon.run()
     else:
-        # One-shot mode
         daemon = MusicDaemon()
         print(json.dumps(daemon.get_state()))

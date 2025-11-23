@@ -1,32 +1,62 @@
 // ============================================================================
 // DASHBOARD COMPONENT
 // ============================================================================
-// Floating dashboard window with user info and music player
 
-// Dashboard container
+// Dashboard container - sleek and theme-compliant
 .dashboard-container {
   background: $gradient-bg-overlay;
 
+  // Theme-aware border (defined in theme file)
   @if $widget-border-enabled {
-    border: $border-width-normal solid $border-color-bright;
+    border: $border-width-normal solid $dashboard-border-color;
   }
 
   border-radius: $radius-lg;
   padding: $space-lg;
 
   @if $widget-shadow-enabled {
-    box-shadow: $shadow-xl;
+    box-shadow: $dashboard-shadow;
   }
 }
 
-// Dashboard toggle button (in bar)
+// Floating Close Button
+.dashboard-close-btn {
+  background: transparent;
+  color: $fg-secondary;
+  font-size: 16px;
+  min-width: 24px;
+  min-height: 24px;
+  border-radius: $radius-full;
+  margin-top: -8px;
+  margin-right: -8px;
+  transition: all $transition-fast;
+  border: 1px solid transparent;
+
+  &:hover {
+    color: $accent-red-bright;
+    background: rgba($accent-red, 0.1);
+    border-color: rgba($accent-red, 0.3);
+    box-shadow: 0 0 5px rgba($accent-red, 0.2);
+  }
+}
+
+// Toggle button (in bar)
 .dashboard-toggle {
   padding: $widget-padding-vertical $widget-padding-horizontal;
-  margin: 0;
+
+  // Use the standard widget margin for consistent spacing
+  margin-right: $widget-margin-horizontal;
+  margin-left: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+
   border-radius: $applet-radius;
   min-width: $workspace-min-size;
   min-height: $workspace-min-size;
+  font-size: 18px;
+  transition: all $transition-normal;
 
+  color: $fg-secondary;
   @if $widget-bg-enabled {
     background: $bg-elevated;
   } @else {
@@ -37,37 +67,27 @@
     border: $border-width-thin solid $border-color-normal;
   }
 
-  color: $fg-secondary;
-  font-size: $icon-size-md;
-  transition: all $transition-normal;
-
   &:hover {
+    color: $accent-primary-bright;
     @if $widget-bg-enabled {
       background: $bg-overlay;
     }
-
     @if $widget-border-enabled {
       border-color: $accent-primary-dim;
     }
-
-    color: $accent-primary-bright;
-
     @if $widget-shadow-enabled {
       box-shadow: $glow-size-sm $glow-primary-subtle;
     }
   }
 
   &.active {
-    @if $widget-bg-enabled {
-      background: $gradient-primary;
-    } @else {
-      border-bottom: 2px solid $accent-primary-bright;
-    }
-
     color: $text-on-accent;
-
+    background: $gradient-primary;
     @if $widget-shadow-enabled {
       box-shadow: $glow-size-md $glow-primary;
+    }
+    @if $widget-bg-enabled {
+      border-color: transparent;
     }
   }
 }
@@ -79,21 +99,18 @@
 .user-info-applet {
   padding: $space-md;
   background: $bg-elevated;
-
   @if $widget-border-enabled {
     border: $border-width-thin solid $border-color-normal;
   }
-
   border-radius: $radius-md;
   margin-bottom: $space-md;
-
   @if $widget-shadow-enabled {
     box-shadow: $shadow-md;
   }
 
   .username {
     font-size: $font-size-lg;
-    font-weight: $font-weight-bold;
+    font-weight: bold;
     color: $accent-primary-bright;
     margin-bottom: $space-sm;
   }
@@ -103,7 +120,7 @@
   .uptime-minutes {
     font-size: $font-size-md;
     color: $fg-secondary;
-    margin: $space-xs 0;
+    margin: 2px 0;
   }
 }
 
@@ -114,128 +131,114 @@
 .music-player-applet {
   padding: $space-md;
   background: $bg-elevated;
-
   @if $widget-border-enabled {
     border: $border-width-thin solid $border-color-normal;
   }
-
   border-radius: $radius-md;
-
   @if $widget-shadow-enabled {
     box-shadow: $shadow-md;
   }
 }
 
-// Main player container
-.player-main-container {
-}
+$album-size: 120px;
 
-// Player left section
 .player-left-section {
+  margin-right: $space-md;
 }
-
-// Player right section
-.player-right-section {
-  min-width: 150px;
-}
-
-// Album art section with app switcher buttons
 .album-section {
   margin: $space-sm 0;
 }
 
-// App switcher buttons - thin gradient bars
+// SWITCHERS: SEAMLESS INTEGRATION
 .app-switcher-left,
 .app-switcher-right {
   min-width: 12px;
-  min-height: 150px;
+  min-height: $album-size;
   margin: 0;
   padding: 0;
-  border-radius: $radius-sm;
   border: none;
+  opacity: 0.8;
   transition: all $transition-fast;
 
   &:hover {
+    opacity: 1;
+    min-width: 16px;
     @if $widget-shadow-enabled {
-      box-shadow: $glow-size-sm $glow-primary-subtle;
+      box-shadow: 0 0 10px $accent-primary;
     }
   }
 }
 
+// Left Button: Gradient from Color (Left) to Black (Right)
+// Flat right side to join with image seamlessy
 .app-switcher-left {
-  // Gradient from left (black) to right (colored towards image)
-  background: linear-gradient(
-    to left,
-    rgba(0, 0, 0, 0.8),
-    $accent-primary-bright
-  );
-  margin-right: $space-xs;
+  background: linear-gradient(to right, $accent-primary-dim, #000000);
+  border-radius: $radius-sm 0 0 $radius-sm;
+  margin-right: 0;
 }
 
+// Right Button: Gradient from Black (Left) to Color (Right)
+// Flat left side to join with image seamlessy
 .app-switcher-right {
-  // Gradient from left (colored towards image) to right (black)
-  background: linear-gradient(
-    to left,
-    $accent-primary-bright,
-    rgba(0, 0, 0, 0.8)
-  );
-  margin-left: $space-xs;
+  background: linear-gradient(to right, #000000, $accent-primary-dim);
+  border-radius: 0 $radius-sm $radius-sm 0;
+  margin-left: 0;
 }
 
-// Album art container
-.album-art-container {
-}
-
+// Album Art
 .album-art {
-  border-radius: $radius-md;
-
-  @if $widget-border-enabled {
-    border: $border-width-thin solid $border-color-bright;
-  }
-
-  @if $widget-shadow-enabled {
-    box-shadow: $shadow-lg;
-  }
-}
-
-// Album art placeholder
-.album-art-placeholder {
-  min-width: 70px;
-  min-height: 70px;
+  min-width: $album-size;
+  min-height: $album-size;
+  border-radius: 0; // Flat sides for seamless join
   background-size: cover;
   background-position: center;
-  background: $bg-tertiary;
-  border-radius: $radius-md;
+  background-repeat: no-repeat;
 
+  // Inset shadow creates the "shaded to sides" effect blending into the black buttons
+  box-shadow:
+    inset 15px 0 20px -10px rgba(0, 0, 0, 0.9),
+    inset -15px 0 20px -10px rgba(0, 0, 0, 0.9);
+
+  @if $widget-border-enabled {
+    border-top: $border-width-thin solid $border-color-bright;
+    border-bottom: $border-width-thin solid $border-color-bright;
+    border-left: none;
+    border-right: none;
+  }
+}
+
+.album-art-placeholder {
+  min-width: $album-size;
+  min-height: $album-size;
+  background: $bg-tertiary;
+  border-radius: 0;
+  color: $fg-tertiary;
   @if $widget-border-enabled {
     border: $border-width-thin solid $border-color-normal;
   }
-
   .placeholder-icon {
-    font-size: 56px;
-    color: $fg-tertiary;
+    font-size: 48px;
   }
 }
 
-// Player name label
 .player-name {
   font-size: $font-size-sm;
-  color: $fg-tertiary;
-  margin: $space-sm 0;
+  color: $fg-secondary;
+  font-weight: $font-weight-bold;
+  margin-top: $space-sm;
 }
 
-// Seek bar
+.player-right-section {
+  min-width: 140px;
+}
+
 .seek-bar {
-  margin: $space-md 0;
+  margin-bottom: $space-lg;
 
   trough {
-    min-height: 6px;
+    min-height: 4px;
     background: $bg-tertiary;
     border-radius: $radius-full;
-
-    @if $widget-border-enabled {
-      border: $border-width-thin solid $border-color-subtle;
-    }
   }
 
   highlight {
@@ -245,35 +248,59 @@
 
   slider {
     all: unset;
-    min-width: 0;
-    min-height: 0;
-    background: transparent;
-    border: none;
+    min-width: 10px;
+    min-height: 10px;
+    background: $fg-bright;
+    border-radius: 50%;
+    margin: -3px 0;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    transition: all $transition-fast;
+
+    &:hover {
+      min-width: 12px;
+      min-height: 12px;
+      margin: -4px 0;
+    }
   }
 }
 
-// Player controls (prev/play/next buttons)
 .player-controls {
-  margin: $space-md 0;
+  margin-top: $space-xs;
 }
 
 .control-button {
-  min-width: 44px;
-  min-height: 44px;
-  padding: $space-sm;
-  font-size: $font-size-lg;
-  background: $bg-elevated;
-  border: $border-width-thin solid $border-color-normal;
-  border-radius: $radius-sm;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  font-size: 16px;
+  background: transparent;
   color: $fg-primary;
+  border-radius: 50%;
+  border: 1px solid transparent;
   transition: all $transition-fast;
 
   &:hover {
     background: $bg-overlay;
-    border-color: $accent-primary-dim;
     color: $accent-primary-bright;
-
+    border-color: $accent-primary-dim;
+    text-shadow: 0 0 5px $accent-primary;
     @if $widget-shadow-enabled {
+      box-shadow: $glow-size-sm $glow-primary-subtle;
+    }
+  }
+
+  &.main {
+    min-width: 42px;
+    min-height: 42px;
+    font-size: 22px;
+    color: $accent-primary;
+    background: rgba($accent-primary, 0.1);
+    border-color: rgba($accent-primary, 0.3);
+
+    &:hover {
+      color: $text-on-accent;
+      background: $accent-primary;
+      border-color: $accent-primary;
       box-shadow: $glow-size-md $glow-primary;
     }
   }

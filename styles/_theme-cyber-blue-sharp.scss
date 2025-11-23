@@ -1,134 +1,96 @@
 // ============================================================================
-// DESIGN TOKENS - CYBER MINI THEME
+// DESIGN TOKENS - CYBER BLUE SHARP
 // ============================================================================
-// SPACING PHILOSOPHY (SIMPLIFIED):
-// --------------------------------
-// 1. Bar padding: Outer space around ALL content (vertical + horizontal)
-// 2. Widget margins: ONLY left/right for horizontal spacing between widgets
-// 3. Widget padding: Height control (vertical) + internal spacing (horizontal)
-// 4. NO vertical margins: Height ONLY via padding
-//
-// Layout structure:
-//   bar (padding) → sections (no spacing) → widgets (horizontal margin + padding)
-//
-// Benefits: Easy to modify, no conflicts, consistent height, clean horizontal layout
+// Style: Sharp, neon, glowing, technical, tight spacing
 
-// ============================================================================
 // COLOR PRIMITIVES
-// ============================================================================
+$bg-primary: #0b0e14;
+$bg-secondary: #0e1218;
+$bg-tertiary: #12161d;
+$bg-elevated: #12161d;
+$bg-overlay: #161b22;
 
-// Background colors - darker, cooler
-$bg-primary: #0b0e14; // Deeper, cooler black
-$bg-secondary: #0e1218; // Cool dark grey
-$bg-tertiary: #12161d; // Slightly lighter
-$bg-elevated: #181c24; // Elevated surfaces
-$bg-overlay: #1e222a; // Overlays
+$fg-primary: #adb5bd;
+$fg-secondary: #6c757d;
+$fg-tertiary: #495057;
+$fg-bright: #ffffff;
+$fg-dim: #343a40;
 
-// Foreground colors - cooler tones
-$fg-primary: #adb5bd; // Cool grey text
-$fg-secondary: #6c757d; // Muted grey
-$fg-tertiary: #495057; // Dark grey
-$fg-bright: #e9ecef; // Bright white
-$fg-dim: #343a40; // Very dark grey
-
-// Special text colors
 $text-on-light: #0b0e14;
-$text-on-accent: #0a0d12; // Very dark for bright backgrounds
+$text-on-accent: #0a0d12;
 $text-on-dark: #f8f9fa;
 
-// Accent colors - Cyber blue primary
-$accent-primary: #00d9ff; // Bright cyan blue
-$accent-primary-bright: #4dffff; // Very bright
-$accent-primary-dim: #00a8cc; // Dimmer blue
+// Primary Accent (Neon Cyan)
+$accent-primary: #00d9ff;
+$accent-primary-bright: #80ffea;
+$accent-primary-dim: #007acc;
 
-// Secondary accents - neon colors
+// Secondary Accents
 $accent-blue: #0066ff;
 $accent-blue-bright: #3399ff;
 $accent-blue-dim: #0052cc;
-
 $accent-green: #00ff88;
 $accent-green-bright: #33ffaa;
 $accent-green-dim: #00cc6a;
-
 $accent-red: #ff0055;
 $accent-red-bright: #ff3377;
 $accent-red-dim: #cc0044;
-
 $accent-cyan: #00ffff;
 $accent-cyan-bright: #66ffff;
 $accent-cyan-dim: #00cccc;
-
 $accent-magenta: #ff00ff;
 $accent-magenta-bright: #ff66ff;
 $accent-magenta-dim: #cc00cc;
-
 $accent-yellow: #ffee00;
 $accent-yellow-bright: #ffff33;
 $accent-yellow-dim: #ccbb00;
 
-// ============================================================================
-// SEMANTIC COLORS
-// ============================================================================
+// SEMANTIC
 $color-success: $accent-green;
 $color-warning: $accent-yellow;
 $color-error: $accent-red;
 $color-info: $accent-primary;
 
-// ============================================================================
-// BORDER SYSTEM - SHARP THEME
-// ============================================================================
-$border-width-thin: 2px; // Thicker for cyber look
-$border-width-normal: 3px;
-$border-width-thick: 4px;
+// BORDER SYSTEM - SHARP & TECHY
+$border-width-thin: 1px;
+$border-width-normal: 2px; // Thicker, distinct borders
+$border-width-thick: 3px;
 
 $border-color-subtle: #1a1e26;
-$border-color-normal: #2a2e36;
-$border-color-bright: #3a3e46;
+$border-color-normal: rgba(0, 217, 255, 0.3); // Faint neon glow
+$border-color-bright: $accent-primary-dim; // Solid neon
 
-// SHARP CORNERS - no rounded edges!
+// Radius - SHARP (0px)
 $radius-none: 0px;
-$radius-sm: 0px; // Sharp!
-$radius-md: 0px; // Sharp!
-$radius-lg: 0px; // Sharp!
-$radius-xl: 0px; // Sharp!
-$radius-full: 0px; // Even "full" is sharp
+$radius-sm: 0px;
+$radius-md: 0px;
+$radius-lg: 0px;
+$radius-xl: 0px;
+$radius-full: 0px;
 
-// ============================================================================
-// SHADOW & GLOW SYSTEM - STRONGER GLOWS
-// ============================================================================
+$applet-radius: 0px;
+$time-radius: 0px;
+$workspace-radius: 0px;
+
+// SHADOWS & GLOWS - STRONG
 $shadow-color-base: rgba(0, 0, 0, 0.7);
 $shadow-color-strong: rgba(0, 0, 0, 0.9);
-
 $shadow-sm: 0 2px 4px $shadow-color-base;
 $shadow-md: 0 4px 8px $shadow-color-base;
 $shadow-lg: 0 8px 16px $shadow-color-strong;
 $shadow-xl: 0 12px 24px $shadow-color-strong;
 
-// Stronger glows for cyberpunk feel
 $glow-size-sm: 0 0 12px;
 $glow-size-md: 0 0 20px;
 $glow-size-lg: 0 0 30px;
 $glow-size-xl: 0 0 40px;
 
-// Bright neon glow colors
 $glow-primary: rgba(0, 217, 255, 0.7);
 $glow-primary-subtle: rgba(0, 217, 255, 0.4);
 $glow-primary-strong: rgba(0, 217, 255, 1);
 
-$glow-blue: rgba(0, 102, 255, 0.7);
-$glow-blue-subtle: rgba(0, 102, 255, 0.4);
-
-$glow-green: rgba(0, 255, 136, 0.7);
-$glow-green-subtle: rgba(0, 255, 136, 0.4);
-
-$glow-red: rgba(255, 0, 85, 0.8);
-$glow-red-subtle: rgba(255, 0, 85, 0.5);
-
-// ============================================================================
-// GRADIENT SYSTEM - HORIZONTAL FOR CYBER FEEL
-// ============================================================================
-$gradient-direction: 90deg; // Horizontal for cyber aesthetic
-
+// GRADIENTS - HORIZONTAL TECH
+$gradient-direction: 90deg;
 $gradient-primary: linear-gradient(
   $gradient-direction,
   $accent-primary-dim,
@@ -139,7 +101,6 @@ $gradient-primary-bright: linear-gradient(
   $accent-primary,
   $accent-cyan
 );
-
 $gradient-blue: linear-gradient(
   $gradient-direction,
   $accent-blue-dim,
@@ -155,7 +116,6 @@ $gradient-red: linear-gradient(
   $accent-red-dim,
   $accent-red-bright
 );
-
 $gradient-multi: linear-gradient(
   $gradient-direction,
   $accent-primary 0%,
@@ -174,226 +134,90 @@ $gradient-bg-overlay: linear-gradient(
   rgba(30, 34, 42, 0.98)
 );
 
-// ============================================================================
-// SPACING SYSTEM - SIMPLIFIED
-// ============================================================================
-// Base spacing units
+// SPACING - COMPACT & TECHNICAL
 $space-xs: 4px;
-$space-sm: 8px;
-$space-md: 12px;
-$space-lg: 16px;
-$space-xl: 24px;
+$space-sm: 6px;
+$space-md: 10px;
+$space-lg: 14px;
+$space-xl: 20px;
 
-// Semantic spacing (clearer purpose)
-$bar-padding-vertical: $space-sm; // Vertical padding around bar content
-$bar-padding-horizontal: $space-sm; // Horizontal padding around bar content
-$widget-margin-horizontal: $space-xs; // Space between widgets (left/right only)
-$widget-padding-vertical: $space-sm; // Widget height control
-$widget-padding-horizontal: $space-md; // Widget internal horizontal spacing
+$bar-padding-vertical: 6px;
+$bar-padding-horizontal: 6px;
+$widget-margin-horizontal: 4px;
+$widget-padding-vertical: 6px;
+$widget-padding-horizontal: 10px;
 
-// ============================================================================
-// TYPOGRAPHY SYSTEM
-// ============================================================================
-$font-family-primary:
-  "CodeNewRoman Nerd Font", "JetBrains Mono", "FiraCode Nerd Font",
-  "Iosevka Nerd Font", monospace;
+// DASHBOARD SPECIFIC
+$dashboard-btn-margin-right: 12px; // Adds gap between toggle and workspaces
+$dashboard-border-color: $accent-primary; // Neon Border
+$dashboard-shadow: 0 0 20px rgba(0, 217, 255, 0.15); // Neon Glow
 
+// TYPOGRAPHY
+$font-family-primary: "CodeNewRoman Nerd Font", "JetBrains Mono", monospace;
 $font-size-xs: 10px;
 $font-size-sm: 11px;
 $font-size-md: 13px;
 $font-size-lg: 14px;
 $font-size-xl: 16px;
-
 $font-weight-normal: 400;
 $font-weight-medium: 500;
 $font-weight-bold: 700;
-
 $line-height-tight: 1.2;
 $line-height-normal: 1.5;
 $line-height-relaxed: 1.7;
 
-// ============================================================================
-// TRANSITION SYSTEM - SNAPPIER
-// ============================================================================
+// TRANSITIONS - FAST
 $transition-timing: ease-out;
 $transition-timing-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
-
-$transition-fast: 100ms $transition-timing; // Faster
-$transition-normal: 200ms $transition-timing; // Snappier
+$transition-fast: 100ms $transition-timing;
+$transition-normal: 200ms $transition-timing;
 $transition-slow: 300ms $transition-timing;
 $transition-smooth: 250ms $transition-timing-smooth;
 
-// ============================================================================
-// STYLE MODE CONTROLS - FULL THEME
-// ============================================================================
-// These variables control whether widgets use bubble/card style or flat/separator style
+// STYLE MODE
+$style-mode: "bubble";
+$widget-bg-enabled: true;
+$widget-border-enabled: true;
+$widget-shadow-enabled: true;
+$widget-use-separators: false;
+$workspace-active-border-style: "bottom";
 
-$style-mode: "bubble"; // 'bubble' or 'flat'
-$widget-bg-enabled: true; // Enable backgrounds on individual widgets
-$widget-border-enabled: true; // Enable borders on individual widgets
-$widget-shadow-enabled: true; // Enable shadows on widgets
-$widget-use-separators: false; // Don't use separators (widgets are bubbles)
-$workspace-active-border-style: "bottom"; // 'full' or 'bottom' - for flat mode active workspace (not used in bubble mode)
-
-// Uniform widget styling
-$applet-min-width: 30px;
-$applet-radius: $radius-none; // Sharp corners for cyber theme
-
-// ============================================================================
-// COMPONENT-SPECIFIC TOKENS
-// ============================================================================
-
-// Workspace - cyber blue theme
-$workspace-bg-default: $bg-elevated;
-$workspace-bg-active: $gradient-primary;
-$workspace-bg-hover: $bg-overlay;
-
-$workspace-text-default: $fg-secondary;
-$workspace-text-occupied: $accent-primary;
-$workspace-text-active: $text-on-accent;
-$workspace-text-urgent: $accent-red-bright;
-
-$workspace-border-default: $border-color-normal;
-$workspace-border-occupied: $accent-primary-dim;
-$workspace-border-active: $accent-primary-bright;
-$workspace-border-urgent: $accent-red-bright;
-
-$workspace-shadow-default: none;
-$workspace-shadow-active: $glow-size-lg $glow-primary-strong; // Stronger glow!
-$workspace-shadow-hover: $glow-size-md $glow-primary-subtle;
-$workspace-shadow-urgent: $glow-size-md $glow-red;
-
-$workspace-radius: $radius-none; // Sharp!
-$workspace-padding: $space-xs;
-$workspace-min-size: 28px;
-
-// Button - sharp and glowing
-$button-bg-default: $bg-elevated;
-$button-bg-active: $gradient-primary;
-$button-bg-hover: $bg-overlay;
-
-$button-text-default: $fg-primary;
-$button-text-active: $text-on-accent;
-
-$button-border-default: $border-color-normal;
-$button-border-active: $accent-primary-bright;
-$button-border-hover: $accent-primary-dim;
-
-$button-shadow-default: none;
-$button-shadow-active: $glow-size-lg $glow-primary;
-$button-shadow-hover: $glow-size-sm $glow-primary-subtle;
-
-$button-radius: $radius-none; // Sharp!
-$button-padding-x: $space-md;
-$button-padding-y: $space-xs;
-
-// Card - sharp edges
-$card-bg: $bg-elevated;
-$card-border: $border-color-bright;
-$card-border-hover: $accent-primary;
-$card-radius: $radius-none; // Sharp!
-$card-padding: $space-md;
-$card-shadow: $shadow-lg;
-$card-shadow-hover: $shadow-xl;
-
-// Badge - sharp and neon
-$badge-bg: $bg-overlay;
-$badge-border: $accent-primary;
-$badge-text: $accent-primary-bright;
-$badge-radius: $radius-none; // Sharp!
-$badge-padding-x: $space-sm;
-$badge-padding-y: $space-xs;
-$badge-font-size: $font-size-sm;
-
-// Icon
+// COMPONENT SCALES
 $icon-size-sm: 14px;
 $icon-size-md: 16px;
 $icon-size-lg: 20px;
-$icon-color-default: $fg-secondary;
-$icon-color-active: $accent-primary-bright;
-$icon-glow-active: $glow-size-lg $glow-primary;
-
-// Scale components (vertical fill bars) - CYBER SHARP STYLE
 $scale-width: 8px;
 $scale-height: 10px;
-$scale-margin-top: 6px;
-$scale-margin-bottom: 6px;
 $scale-trough-bg: rgba($accent-primary-dim, 0.2);
-$scale-radius: $radius-none; // Sharp edges!
+$scale-radius: 0px;
 $scale-border: 2px solid $accent-primary-dim;
 $scale-glow: $glow-size-sm $glow-primary-subtle;
 
-// Bar - sharp and glowing
-$bar-bg: $gradient-bg-primary;
+// BAR CONFIG
+$bar-bg: rgba(11, 14, 20, 0.98);
 $bar-border: $accent-primary-dim;
-$bar-radius: $radius-none; // Sharp!
-$bar-padding-x: $space-md;
-$bar-padding-y: $space-sm; // Increased for larger bar height
+$bar-radius: 0px;
+$bar-padding-x: 6px;
+$bar-padding-y: 6px;
 $bar-shadow: $shadow-xl;
 
-// Section layouts
-$section-padding-x: $space-sm;
-$section-padding-y: $space-xs; // Reduced padding for larger bar
-$section-min-height: 50px; // Increased for larger bar
+$section-padding-x: 6px;
+$section-padding-y: 6px;
+$section-min-height: 30px;
 
-// Time applet - sharp and glowing
-$time-bg: $bg-elevated;
-$time-border: $accent-primary-dim;
-$time-border-hover: $accent-primary-bright;
-$time-radius: $radius-none; // Sharp!
-$time-padding-x: $space-lg;
-$time-padding-y: $space-xs;
-$time-shadow-hover: $glow-size-md $glow-primary;
+// COMPONENT OVERRIDES
+$workspace-bg-default: $bg-elevated;
+$workspace-bg-active: $gradient-primary;
+$workspace-radius: 0px;
+$workspace-min-size: 28px;
 
-$time-text-color: $accent-primary-bright; // Bright cyan
-$time-text-size: $font-size-xl;
-$time-text-weight: $font-weight-bold;
-
-$date-text-color: $accent-primary-bright;
-$date-text-size: $font-size-md;
-$date-text-weight: $font-weight-medium;
-
-// Weather/Pomodoro widgets
-$weather-bg: $bg-elevated;
-$weather-border: $accent-primary-dim;
-$weather-border-hover: $accent-primary-bright;
-$weather-shadow-hover: $glow-size-md $glow-primary;
-$weather-icon-color: $fg-secondary;
-$weather-text-color: $fg-primary;
-$weather-text-size: $font-size-md;
-$weather-text-weight: $font-weight-medium;
-
-$pomodoro-bg: $bg-elevated;
-$pomodoro-border: $accent-primary-dim;
-$pomodoro-border-hover: $accent-primary-bright;
-$pomodoro-shadow-hover: $glow-size-md $glow-primary;
-
-// Workspace
-$workspace-radius: $radius-none;
-
-// Separator - INVISIBLE but with spacing (full theme doesn't show separators but needs spacing)
 $separator-color: transparent;
 $separator-width: 0px;
 $separator-height: 0px;
-$separator-margin: 6px; // Regular widget spacing
-
-// Workspace separator - reduced for compact workspace layout
+$separator-margin: 6px;
 $workspace-separator-margin: 4px;
 
-// ============================================================================
-// EFFECT TOKENS
-// ============================================================================
-$overlay-opacity: 0.9;
-$hover-opacity: 0.8;
-$disabled-opacity: 0.2;
-
-$blur-sm: blur(4px);
-$blur-md: blur(8px);
-$blur-lg: blur(16px);
-
-// ============================================================================
 // LEGACY ALIASES
-// ============================================================================
 $accent-orange: $accent-primary;
 $accent-orange-bright: $accent-primary-bright;
 $accent-orange-dim: $accent-primary-dim;
