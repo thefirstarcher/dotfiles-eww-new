@@ -1,0 +1,193 @@
+// ============================================================================
+// MICROPHONE MIXER COMPONENT
+// ============================================================================
+// Uses magenta accent to distinguish from volume mixer (orange/cyan)
+
+.microphone-mixer-container {
+  background: $gradient-bg-overlay;
+
+  @if $widget-border-enabled {
+    border: $border-width-normal solid $dashboard-border-color;
+  }
+
+  border-radius: $radius-lg;
+  padding: $space-lg;
+
+  @if $widget-shadow-enabled {
+    box-shadow: $dashboard-shadow;
+  }
+
+  // Header
+  .mixer-header {
+    margin-bottom: $space-md;
+    padding-bottom: $space-sm;
+    border-bottom: 1px solid $border-color-normal;
+  }
+
+  .mixer-main-title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $accent-magenta-bright;
+  }
+
+  // Section titles
+  .mic-section-title {
+    color: $accent-magenta;
+  }
+
+  // Microphone icons (use magenta instead of primary)
+  .mic-icon {
+    color: $accent-magenta;
+
+    &:hover {
+      color: $accent-magenta-bright;
+    }
+  }
+
+  // Source items
+  .mic-source {
+    &.default {
+      background: rgba($accent-magenta, 0.15);
+
+      @if $widget-border-enabled {
+        border-color: $accent-magenta;
+      }
+    }
+  }
+
+  // Recording app items
+  .recording-app {
+    background: rgba($accent-green, 0.05);
+  }
+
+  // Hover effects
+  .mixer-item:hover {
+    @if $widget-border-enabled {
+      border-color: $accent-magenta-dim;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: 0 0 8px rgba($accent-magenta, 0.3);
+    }
+  }
+
+  // Muted state
+  .mixer-item.muted .mic-icon {
+    color: $accent-red;
+  }
+
+  // Default badge
+  .mic-default-badge {
+    font-size: $font-size-xs;
+    color: $accent-magenta;
+    background: rgba($accent-magenta, 0.1);
+    padding: 2px 8px;
+    border-radius: $radius-sm;
+
+    @if $widget-border-enabled {
+      border: $border-width-thin solid $accent-magenta-dim;
+    }
+  }
+
+  // Volume sliders (magenta theme)
+  .mic-slider {
+    highlight {
+      background: linear-gradient(
+        to right,
+        $accent-magenta-dim,
+        $accent-magenta-bright
+      );
+    }
+
+    slider {
+      background: $accent-magenta-bright;
+      box-shadow: 0 0 6px $accent-magenta;
+    }
+
+    &.over-limit {
+      highlight {
+        background: linear-gradient(to right, $accent-red, $accent-red-bright);
+      }
+
+      slider {
+        background: $accent-red-bright;
+        box-shadow: 0 0 6px $accent-red;
+      }
+    }
+  }
+
+  // Volume text (magenta theme)
+  .mixer-volume-text {
+    color: $accent-magenta-bright;
+
+    &.over-limit {
+      color: $accent-red-bright;
+    }
+  }
+
+  // Set default button (magenta theme)
+  .mic-set-default-btn {
+    background: rgba($accent-magenta, 0.1);
+    color: $accent-magenta;
+
+    @if $widget-border-enabled {
+      border: $border-width-thin solid $accent-magenta-dim;
+    }
+
+    &:hover {
+      background: $accent-magenta;
+      color: $text-on-accent;
+
+      @if $widget-shadow-enabled {
+        box-shadow: 0 0 8px rgba($accent-magenta, 0.5);
+      }
+    }
+  }
+
+  // Scrollbar (magenta theme)
+  scrolledwindow {
+    scrollbar.vertical {
+      min-width: 12px;
+      background-color: transparent;
+
+      trough {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: $radius-sm;
+      }
+
+      slider {
+        background-color: rgba($accent-magenta, 0.4);
+        border-radius: $radius-full;
+        min-width: 6px;
+        margin: 3px;
+        min-height: 40px;
+
+        &:hover {
+          background-color: $accent-magenta;
+        }
+
+        &:active {
+          background-color: $accent-magenta-bright;
+        }
+      }
+    }
+
+    undershoot.top {
+      background-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.8),
+        transparent
+      );
+      background-size: 100% 20px;
+    }
+
+    undershoot.bottom {
+      background-image: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.8),
+        transparent
+      );
+      background-size: 100% 20px;
+    }
+  }
+}

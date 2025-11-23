@@ -129,6 +129,10 @@
   :initial '{"sinks": [], "sink_inputs": []}'
   "~/.config/eww/scripts/volume-manager.sh listen")
 
+(deflisten mic_mixer
+  :initial '{"sources": [], "source_outputs": []}'
+  "~/.config/eww/scripts/microphone-manager.sh listen")
+
 ;; ============================================================================
 ;; DASHBOARD DATA SOURCES
 ;; ============================================================================

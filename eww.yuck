@@ -50,8 +50,25 @@
   :exclusive false
   ;; Auto-close when mouse leaves
   (eventbox
-    :onhoverlost "eww close volume-mixer && eww update show-volume-mixer=false"
+    :onhoverlost "eww close volume-mixer"
     (volume_mixer_layout))
+)
+
+;; Microphone Mixer window - floating microphone control panel
+(defwindow microphone-mixer
+  :monitor 0
+  :geometry (geometry
+  :x "5px"
+  :y "5px"
+  :width "400px"
+  :height "600px"
+  :anchor "top right")
+  :stacking "overlay"
+  :exclusive false
+  ;; Auto-close when mouse leaves
+  (eventbox
+    :onhoverlost "eww close microphone-mixer"
+    (microphone_mixer_layout))
 )
 
 ;; ============================================================================
@@ -294,6 +311,7 @@
     :onscroll "if [ '{}' = 'up' ]; then ~/.config/eww/scripts/microphone.sh up; else ~/.config/eww/scripts/microphone.sh down; fi"
     :cursor "pointer"
     :onclick "~/.config/eww/scripts/microphone.sh toggle"
+    :onrightclick "eww open microphone-mixer --toggle"
     (box
       :class "microphone-applet ${microphone.muted ? 'muted' : ''}"
       :orientation "h"
@@ -501,6 +519,216 @@
       :max 150
       ;; UPDATED: Uses set-sink-input-volume
       :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/scripts/volume-manager.sh set-sink-input-volume ${app.index} $vol'"
+    )
+  )
+)
+
+;; ============================================================================
+;; MICROPHONE MIXER LAYOUT
+;; ============================================================================
+
+(defwidget microphone_mixer_layout []
+  (box
+    :class "microphone-mixer-container"
+    :orientation "v"
+    :space-evenly false
+    :spacing 12
+    (overlay
+      ;; Main content
+      (box
+        :orientation "v"
+        :space-evenly false
+        :spacing 12
+
+        ;; Header
+        (box
+          :class "mixer-header"
+          :orientation "h"
+          :halign "start"
+          (label
+            :class "mixer-main-title"
+            :text "󰍬 Microphone Mixer")
+        )
+
+        ;; Input Devices Section
+        (box
+          :class "mixer-section"
+          :orientation "v"
+          :space-evenly false
+          :spacing 8
+          (label
+            :class "mixer-section-title mic-section-title"
+            :text "Input Devices"
+            :halign "start")
+          (scroll
+            :height 200
+            :vscroll true
+            :hscroll false
+            (box
+              :orientation "v"
+              :space-evenly false
+              :spacing 6
+              (for source in "${mic_mixer.sources}"
+                (mixer-source-widget :source source)
+              )
+            )
+          )
+        )
+
+        ;; Recording Applications Section
+        (box
+          :class "mixer-section"
+          :orientation "v"
+          :space-evenly false
+          :spacing 8
+          (label
+            :class "mixer-section-title mic-section-title"
+            :text "Recording Applications"
+            :halign "start")
+          (scroll
+            :height 300
+            :vscroll true
+            :hscroll false
+            (box
+              :orientation "v"
+              :space-evenly false
+              :spacing 6
+              (for app in "${mic_mixer.source_outputs}"
+                (mixer-recording-app-widget :app app)
+              )
+            )
+          )
+        )
+      )
+
+      ;; Floating close button (top-right)
+      (button
+        :class "mixer-close-btn"
+        :halign "end"
+        :valign "start"
+        :onclick "eww close microphone-mixer && eww update show-microphone-mixer=false"
+        :tooltip "Close Microphone Mixer"
+        "󰅖")
+    )
+  )
+)
+
+;; Source (Input Device) Widget
+(defwidget mixer-source-widget [source]
+  (box
+    :class "mixer-item mic-source ${source.is_default ? 'default' : ''} ${source.muted ? 'muted' : ''}"
+    :orientation "v"
+    :space-evenly false
+    :spacing 4
+
+    ;; Header: Icon, Name, Volume %
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing 8
+      (eventbox
+        :cursor "pointer"
+        :onclick "~/.config/eww/scripts/microphone-manager.sh toggle-mute-source ${source.index}"
+        :tooltip "${source.muted ? 'Unmute' : 'Mute'}"
+        (label
+          :class "mixer-icon mic-icon"
+          :text "${source.muted ? '󰍭' : '󰍬'}")
+      )
+      (label
+        :class "mixer-name"
+        :text "${source.description}"
+        :limit-width 30
+        :halign "start"
+        :tooltip "${source.description}")
+      (label
+        :class "mixer-volume-text ${source.volume > 100 ? 'over-limit' : ''}"
+        :text "${source.volume}%"
+        :halign "end")
+    )
+
+    ;; Volume Slider
+    (scale
+      :class "mixer-volume-slider mic-slider ${source.volume > 100 ? 'over-limit' : ''}"
+      :value "${source.volume}"
+      :min 0
+      :max 150
+      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/scripts/microphone-manager.sh set-source-volume ${source.index} $vol'"
+      :tooltip "Volume: ${source.volume}%"
+    )
+
+    ;; Footer: Default Badge or Set Default Button
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing 8
+
+      ;; Default badge (shown if is_default)
+      (box
+        :visible "${source.is_default}"
+        :halign "start"
+        (label
+          :class "default-badge mic-default-badge"
+          :text "󰄬 Default")
+      )
+
+      ;; Set as default button (shown if NOT default)
+      (box
+        :visible "${!source.is_default}"
+        :halign "end"
+        (eventbox
+          :cursor "pointer"
+          (button
+            :class "set-default-btn mic-set-default-btn"
+            :onclick "~/.config/eww/scripts/microphone-manager.sh set-default-source \"${source.name}\""
+            :tooltip "Make this the default input device"
+            "Set as Default")
+        )
+      )
+    )
+  )
+)
+
+;; Recording Application Widget
+(defwidget mixer-recording-app-widget [app]
+  (box
+    :class "mixer-item app recording-app ${app.muted ? 'muted' : ''}"
+    :orientation "v"
+    :space-evenly false
+    :spacing 4
+
+    ;; Header: Icon, App Name, Volume %
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing 8
+      (eventbox
+        :cursor "pointer"
+        :onclick "~/.config/eww/scripts/microphone-manager.sh toggle-mute-source-output ${app.index}"
+        :tooltip "${app.muted ? 'Unmute' : 'Mute'}"
+        (label
+          :class "mixer-icon mic-icon"
+          :text "${app.muted ? '󰍭' : '󰍬'}")
+      )
+      (label
+        :class "mixer-name app-name"
+        :text "${app.name}"
+        :limit-width 30
+        :halign "start"
+        :tooltip "${app.name}")
+      (label
+        :class "mixer-volume-text ${app.volume > 100 ? 'over-limit' : ''}"
+        :text "${app.volume}%"
+        :halign "end")
+    )
+
+    ;; Volume Slider
+    (scale
+      :class "mixer-volume-slider mic-slider ${app.volume > 100 ? 'over-limit' : ''}"
+      :value "${app.volume}"
+      :min 0
+      :max 150
+      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/scripts/microphone-manager.sh set-source-output-volume ${app.index} $vol'"
+      :tooltip "Volume: ${app.volume}%"
     )
   )
 )
