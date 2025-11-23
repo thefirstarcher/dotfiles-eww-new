@@ -1,1 +1,2 @@
-./rust-applets/**/target/
+rust-applets/**/target/
+rust-applets/**/Cargo.lock
