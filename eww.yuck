@@ -24,9 +24,9 @@
 (defwindow dashboard
   :monitor 0
   :geometry (geometry
-    :x "10px"
-    :y "60px"
-    :width "350px"
+    :x "5px"
+    :y "5px"
+    :width "390px"     ;; INCREASED from 350px to fit Spotify controls
     :height "500px"
     :anchor "top left")
   :stacking "overlay"
@@ -35,6 +35,23 @@
   (eventbox
     :onhoverlost "eww close dashboard && eww update show-dashboard=false"
     (dashboard_layout))
+)
+
+;; Volume Mixer window - floating audio control panel
+(defwindow volume-mixer
+  :monitor 0
+  :geometry (geometry
+    :x "5px"
+    :y "5px"
+    :width "400px"
+    :height "600px"
+    :anchor "top right")
+  :stacking "overlay"
+  :exclusive false
+  ;; Auto-close when mouse leaves
+  (eventbox
+    :onhoverlost "eww close volume-mixer && eww update show-volume-mixer=false"
+    (volume_mixer_layout))
 )
 
 ;; ============================================================================
@@ -87,6 +104,9 @@
       (conditional-widget :condition show-battery
         (battery-widget))
       (mini-separator)
+      (conditional-widget :condition show-updates
+        (updates-widget))
+      (mini-separator)
       (conditional-widget :condition show-notifications
         (notifications-widget)))
   )
@@ -120,10 +140,10 @@
 
 (defwidget dashboard-toggle-button []
   (eventbox
-    :onclick "~/.config/eww/scripts/toggle-dashboard.sh"
     :cursor "pointer"
     :tooltip "Toggle Dashboard"
     (button
+      :onclick "~/.config/eww/scripts/toggle-dashboard.sh"
       :class "dashboard-toggle ${show-dashboard ? 'active' : ''}"
       "󰍜")
   )
@@ -293,6 +313,7 @@
     :onscroll "if [ '{}' = 'up' ]; then ~/.config/eww/scripts/volume.sh up; else ~/.config/eww/scripts/volume.sh down; fi"
     :cursor "pointer"
     :onclick "~/.config/eww/scripts/volume.sh toggle"
+    :onrightclick "~/.config/eww/scripts/toggle-volume-mixer.sh &"
     (box
       :class "volume-applet ${volume.muted ? 'muted' : ''}"
       :orientation "h"
@@ -319,6 +340,22 @@
   )
 )
 
+(defwidget updates-widget []
+  (eventbox
+    :cursor "pointer"
+    :onclick "kitty -e paru -Syu &"
+    (box
+      :class "updates-applet ${updates.total > 0 ? 'has-updates' : ''}"
+      :orientation "h"
+      :spacing 10
+      :space-evenly true
+      :tooltip "Updates: ${updates.total} (Official: ${updates.official}, AUR: ${updates.aur})\nClick to update"
+      (label :class "updates-icon" :text "${updates.icon}")
+      (label :class "updates-count" :visible "${updates.total > 0}" :text "${updates.total}")
+    )
+  )
+)
+
 (defwidget notifications-widget []
   (box
     :class "notifications-applet ${notifications.dnd ? 'dnd' : ''}${notifications.count > 0 ? ' has-notifications' : ''}"
@@ -328,6 +365,138 @@
     :tooltip "${notifications.dnd ? 'Do Not Disturb' : notifications.count > 0 ? notifications.count + ' notification' + (notifications.count > 1 ? 's' : '') : 'No notifications'}"
     (label :class "notifications-icon" :text "${notifications.dnd ? '󰂛' : notifications.count > 0 ? '󰂚' : '󰂜'}")
     (label :class "notifications-count" :visible "${notifications.count > 0}" :text "${notifications.count}")
+  )
+)
+
+;; ============================================================================
+;; VOLUME MIXER COMPONENTS
+;; ============================================================================
+
+(defwidget volume_mixer_layout []
+  (box
+    :class "volume-mixer-container"
+    :orientation "v"
+    :space-evenly false
+    :spacing 12
+    (overlay
+      (box
+        :orientation "v"
+        :space-evenly false
+        :spacing 12
+        ;; Sinks (Output Devices)
+        (box
+          :class "mixer-section"
+          :orientation "v"
+          :space-evenly false
+          :spacing 8
+          (label :class "mixer-section-title" :text "Output Devices" :halign "start")
+          (scroll
+            :height 200
+            (box
+              :orientation "v"
+              :space-evenly false
+              :spacing 6
+              (for sink in "${mixer.sinks}"
+                (mixer-sink-widget :sink sink)
+              )
+            )
+          )
+        )
+        ;; Sink Inputs (Applications)
+        (box
+          :class "mixer-section"
+          :orientation "v"
+          :space-evenly false
+          :spacing 8
+          (label :class "mixer-section-title" :text "Applications" :halign "start")
+          (scroll
+            :height 300
+            (box
+              :orientation "v"
+              :space-evenly false
+              :spacing 6
+              (for app in "${mixer.sink_inputs}"
+                (mixer-app-widget :app app)
+              )
+            )
+          )
+        )
+      )
+      (button
+        :class "mixer-close-btn"
+        :halign "end"
+        :valign "start"
+        :onclick "eww close volume-mixer && eww update show-volume-mixer=false"
+        :tooltip "Close Mixer"
+        "󰅖")
+    )
+  )
+)
+
+(defwidget mixer-sink-widget [sink]
+  (box
+    :class "mixer-item ${sink.is_default ? 'default' : ''} ${sink.muted ? 'muted' : ''}"
+    :orientation "v"
+    :space-evenly false
+    :spacing 4
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing 8
+      (eventbox
+        :cursor "pointer"
+        :onclick "~/.config/eww/scripts/volume-mixer-cmd.sh mute-sink ${sink.index}"
+        (label :class "mixer-icon" :text "${sink.muted ? '󰖁' : '󰕾'}")
+      )
+      (label :class "mixer-name" :text "${sink.description}" :limit-width 30 :halign "start")
+      (label :class "mixer-volume-text ${sink.volume > 100 ? 'over-limit' : ''}" :text "${sink.volume}%" :halign "end")
+    )
+    (scale
+      :class "mixer-volume-slider ${sink.volume > 100 ? 'over-limit' : ''}"
+      :value "${sink.volume}"
+      :min 0
+      :max 150
+      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/scripts/volume-mixer-cmd.sh set-sink-volume ${sink.index} $vol'"
+    )
+    (box
+      :visible "${!sink.is_default}"
+      :halign "end"
+      (eventbox
+        :cursor "pointer"
+        (button
+          :class "set-default-btn"
+          :onclick "~/.config/eww/scripts/volume-mixer-cmd.sh set-default-sink ${sink.name}"
+          "Set as Default")
+      )
+    )
+  )
+)
+
+(defwidget mixer-app-widget [app]
+  (box
+    :class "mixer-item app ${app.muted ? 'muted' : ''}"
+    :orientation "v"
+    :space-evenly false
+    :spacing 4
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing 8
+      (eventbox
+        :cursor "pointer"
+        :onclick "~/.config/eww/scripts/volume-mixer-cmd.sh mute-sink-input ${app.index}"
+        (label :class "mixer-icon" :text "${app.muted ? '󰖁' : '󰕾'}")
+      )
+      (label :class "mixer-name" :text "${app.name}" :limit-width 30 :halign "start")
+      (label :class "mixer-volume-text ${app.volume > 100 ? 'over-limit' : ''}" :text "${app.volume}%" :halign "end")
+    )
+    (scale
+      :class "mixer-volume-slider ${app.volume > 100 ? 'over-limit' : ''}"
+      :value "${app.volume}"
+      :min 0
+      :max 150
+      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/scripts/volume-mixer-cmd.sh set-sink-input-volume ${app.index} $vol'"
+    )
   )
 )
 
@@ -397,37 +566,64 @@
           :space-evenly false
           :halign "center"
           :valign "center"
-          (button
-             :class "app-switcher-left"
-             ;; Command calls the new rust binary directly
-             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon switch '${music.available_players[0]}'"
-             :visible "${arraylength(music.available_players) > 1}"
-             "")
+          :spacing 0
+
+          (eventbox
+            :cursor "${arraylength(music.available_players) > 1 ? 'pointer' : 'default'}"
+            :tooltip "Switch to: ${music.prev_player}"
+            (button
+               :class "app-switcher-left ${arraylength(music.available_players) > 1 ? '' : 'disabled'}"
+               :onclick "${arraylength(music.available_players) > 1 ? '~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon cycle prev' : ''}"
+               "")
+          )
 
           ;; Album Art
           (box :class "album-art" :visible "${music.art_url != ''}" :style "background-image: url('${music.art_url}');")
-          (box :class "album-art-placeholder" :visible "${music.art_url == ''}" (label :text "" :class "placeholder-icon"))
-
-          (button
-             :class "app-switcher-right"
-             ;; This logic needs a smarter next/prev index calculation, but for now just a placeholder logic
-             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon switch '${music.available_players[0]}'"
-             :visible "${arraylength(music.available_players) > 1}"
-             "")
-        )
-        (label :class "player-name" :text "${music.active_player}" :limit-width 15 :halign "center")
-
-        ;; Player Volume (Below name)
-        (eventbox
-          :onscroll "if [ '{}' = 'up' ]; then ~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon volume up; else ~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon volume down; fi"
-          (scale
-            :class "player-volume-bar"
-            :value "${music.volume * 100}"
-            :min 0
-            :max 100
-            :onchange "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon volume {}"
-            :tooltip "Volume: ${round(music.volume * 100, 0)}%"
+          (box :class "album-art-placeholder" :visible "${music.art_url == ''}"
+            (label :text "" :class "placeholder-icon")
           )
+
+          (eventbox
+            :cursor "${arraylength(music.available_players) > 1 ? 'pointer' : 'default'}"
+            :tooltip "Switch to: ${music.next_player}"
+            (button
+               :class "app-switcher-right ${arraylength(music.available_players) > 1 ? '' : 'disabled'}"
+               :onclick "${arraylength(music.available_players) > 1 ? '~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon cycle next' : ''}"
+               "")
+          )
+        )
+        (label :class "player-name" :text "${music.active_player}" :limit-width 18 :halign "center")
+
+        ;; Player Volume
+        (scale
+          :class "player-volume-bar"
+          :value "${music.volume * 100}"
+          :min 0
+          :max 100
+          :onchange "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon volume {}"
+          :tooltip "Volume: ${round(music.volume * 100, 0)}%"
+        )
+
+        ;; Playback Rate Control (only show if rate != 1.0 or player supports it)
+        (box
+          :class "playback-rate-section"
+          :orientation "v"
+          :space-evenly false
+          :spacing 2
+          :visible "${music.playback_rate != 1.0 || music.active_player != 'No Player'}"
+          (label :class "playback-rate-label" :text "Speed" :halign "center")
+          (scale
+            :class "playback-rate-bar"
+            :value "${music.playback_rate * 100}"
+            :min 25
+            :max 400
+            :onchange "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon playback-rate {}"
+            :tooltip "Playback Speed: ${music.playback_rate}x"
+          )
+          (label
+            :class "playback-rate-value"
+            :text "${music.playback_rate}x"
+            :halign "center")
         )
       )
 
@@ -438,8 +634,9 @@
         :space-evenly false
         :valign "center"
 
-        (label :class "track-title" :text "${music.title}" :limit-width 20 :halign "center")
-        (label :class "track-artist" :text "${music.artist}" :limit-width 20 :halign "center" :visible "${music.artist != ''}")
+        ;; CHANGED: Left align (start) looks better, slightly reduced limit-width
+        (label :class "track-title" :text "${music.title}" :limit-width 18 :halign "start")
+        (label :class "track-artist" :text "${music.artist}" :limit-width 20 :halign "start" :visible "${music.artist != ''}")
 
         ;; Seek Bar
         (scale
@@ -463,40 +660,35 @@
         (box
           :class "player-controls"
           :orientation "h"
-          :space-evenly false
-          :spacing 20
+          :space-evenly true
+          :spacing 8   ;; REDUCED from 20 to 8 to fit 5 buttons
           :halign "center"
 
           ;; Shuffle
           (button
-             :class "control-button small ${music.shuffle ? 'active' : ''}"
-             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon shuffle"
-             :visible "${music.active_player != ''}"
+             :class "control-button small ${music.shuffle ? 'active' : ''} ${music.active_player == '' ? 'disabled' : ''}"
+             :onclick "${music.active_player != '' ? '~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon shuffle' : ''}"
              "")
 
           (button
-             :class "control-button"
-             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon previous"
-             :visible "${music.can_go_previous}"
+             :class "control-button ${music.can_go_previous ? '' : 'disabled'}"
+             :onclick "${music.can_go_previous ? '~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon previous' : ''}"
              "󰒮")
 
           (button
-             :class "control-button main"
-             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon play-pause"
-             :visible "${music.can_play || music.can_pause}"
+             :class "control-button main ${music.can_play || music.can_pause ? '' : 'disabled'}"
+             :onclick "${music.can_play || music.can_pause ? '~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon play-pause' : ''}"
              "${music.playing ? '󰏤' : '󰐊'}")
 
           (button
-             :class "control-button"
-             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon next"
-             :visible "${music.can_go_next}"
+             :class "control-button ${music.can_go_next ? '' : 'disabled'}"
+             :onclick "${music.can_go_next ? '~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon next' : ''}"
              "󰒭")
 
           ;; Loop
           (button
-             :class "control-button small ${music.loop_status != 'None' ? 'active' : ''}"
-             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon loop"
-             :visible "${music.active_player != ''}"
+             :class "control-button small ${music.loop_status != 'None' ? 'active' : ''} ${music.active_player == '' ? 'disabled' : ''}"
+             :onclick "${music.active_player != '' ? '~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon loop' : ''}"
              "${music.loop_status == 'Track' ? '󰑘' : '󰑖'}")
         )
       )

@@ -1,0 +1,191 @@
+// ============================================================================
+// VOLUME MIXER COMPONENT
+// ============================================================================
+// Per-sink and per-app volume control mixer
+
+.volume-mixer-container {
+  background: $gradient-bg-overlay;
+
+  @if $widget-border-enabled {
+    border: $border-width-normal solid $dashboard-border-color;
+  }
+
+  border-radius: $radius-lg;
+  padding: $space-lg;
+
+  @if $widget-shadow-enabled {
+    box-shadow: $dashboard-shadow;
+  }
+}
+
+.mixer-close-btn {
+  background: transparent;
+  color: $fg-secondary;
+  font-size: 16px;
+  min-width: 24px;
+  min-height: 24px;
+  border-radius: $radius-full;
+  margin-top: -8px;
+  margin-right: -8px;
+  transition: all $transition-fast;
+  border: 1px solid transparent;
+
+  &:hover {
+    color: $accent-red-bright;
+    background: rgba($accent-red, 0.1);
+    border-color: rgba($accent-red, 0.3);
+    box-shadow: 0 0 5px rgba($accent-red, 0.2);
+  }
+}
+
+.mixer-section {
+  background: $bg-elevated;
+  border-radius: $radius-md;
+  padding: $space-md;
+  margin-bottom: $space-sm;
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $border-color-normal;
+  }
+
+  @if $widget-shadow-enabled {
+    box-shadow: $shadow-sm;
+  }
+}
+
+.mixer-section-title {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $accent-primary;
+  margin-bottom: $space-sm;
+}
+
+.mixer-item {
+  background: $bg-secondary;
+  padding: $space-sm;
+  border-radius: $radius-sm;
+  margin-bottom: $space-xs;
+  transition: all $transition-fast;
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $border-color-normal;
+  }
+
+  &:hover {
+    background: $bg-overlay;
+
+    @if $widget-border-enabled {
+      border-color: $accent-primary-dim;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $glow-size-sm $glow-primary-subtle;
+    }
+  }
+
+  &.default {
+    background: rgba($accent-primary, 0.1);
+
+    @if $widget-border-enabled {
+      border-color: $accent-primary;
+    }
+  }
+
+  &.muted {
+    opacity: 0.5;
+
+    .mixer-icon {
+      color: $accent-red;
+    }
+  }
+
+  &.app {
+    background: rgba($accent-green, 0.05);
+  }
+}
+
+.mixer-icon {
+  font-size: $icon-size-md;
+  color: $accent-primary;
+  min-width: 24px;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $accent-primary-bright;
+  }
+}
+
+.mixer-name {
+  font-size: $font-size-sm;
+  color: $fg-primary;
+  font-weight: $font-weight-normal;
+}
+
+.mixer-volume-text {
+  font-size: $font-size-sm;
+  color: $accent-primary-bright;
+  font-weight: $font-weight-bold;
+  min-width: 40px;
+
+  &.over-limit {
+    color: $accent-red-bright;
+  }
+}
+
+.mixer-volume-slider {
+  margin-top: 4px;
+
+  trough {
+    min-height: 6px;
+    background: $bg-tertiary;
+    border-radius: $radius-full;
+  }
+
+  highlight {
+    background: $gradient-primary;
+    border-radius: $radius-full;
+  }
+
+  slider {
+    all: unset;
+    min-width: 12px;
+    min-height: 12px;
+    background: $accent-primary-bright;
+    border-radius: 50%;
+    box-shadow: 0 0 6px $accent-primary;
+    margin: -3px 0;
+  }
+
+  &.over-limit {
+    highlight {
+      background: linear-gradient(to right, $accent-red, $accent-red-bright);
+    }
+
+    slider {
+      background: $accent-red-bright;
+      box-shadow: 0 0 6px $accent-red;
+    }
+  }
+}
+
+.set-default-btn {
+  font-size: $font-size-xs;
+  padding: 2px 8px;
+  background: rgba($accent-primary, 0.1);
+  color: $accent-primary;
+  border-radius: $radius-sm;
+  transition: all $transition-fast;
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $accent-primary-dim;
+  }
+
+  &:hover {
+    background: $accent-primary;
+    color: $text-on-accent;
+
+    @if $widget-shadow-enabled {
+      box-shadow: $glow-size-sm $glow-primary;
+    }
+  }
+}

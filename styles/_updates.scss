@@ -1,0 +1,89 @@
+// ============================================================================
+// UPDATES COMPONENT
+// ============================================================================
+// System updates counter (official repos + AUR)
+
+// Component variables - select from theme primitives
+$updates-bg: $bg-elevated;
+$updates-bg-active: rgba($accent-green-dim, 0.2);
+$updates-bg-hover: $bg-overlay;
+
+$updates-border: $border-color-normal;
+$updates-border-active: $accent-green;
+$updates-border-hover: $accent-green-dim;
+
+$updates-icon-color: $fg-secondary;
+$updates-icon-active: $accent-green-bright;
+
+$updates-text-color: $fg-primary;
+$updates-text-active: $accent-green-bright;
+
+$updates-shadow-hover: $glow-size-sm $glow-primary-subtle;
+
+.updates-applet {
+  padding: $widget-padding-vertical $widget-padding-horizontal;
+  margin: 0;
+  border-radius: $applet-radius;
+  min-width: $applet-min-width;
+
+  @if $widget-bg-enabled {
+    background: $updates-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $updates-border;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+
+  // Has updates available
+  &.has-updates {
+    @if $widget-bg-enabled {
+      background: $updates-bg-active;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $updates-border-active;
+    }
+
+    .updates-icon {
+      color: $updates-icon-active;
+    }
+
+    .updates-count {
+      color: $updates-text-active;
+    }
+  }
+
+  &:hover {
+    @if $widget-bg-enabled {
+      background: $updates-bg-hover;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $updates-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $updates-shadow-hover;
+    }
+  }
+}
+
+.updates-icon {
+  font-size: $icon-size-md;
+  color: $updates-icon-color;
+  transition: color $transition-fast;
+}
+
+.updates-count {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $updates-text-color;
+  transition: color $transition-fast;
+  min-width: 12px;
+}

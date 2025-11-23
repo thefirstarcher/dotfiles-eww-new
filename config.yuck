@@ -31,6 +31,7 @@
 (defvar show-notifications true)
 (defvar show-brightness true)
 (defvar show-keyboard true)
+(defvar show-updates true)
 
 ;; Separators are always rendered but styled to be invisible in full themes
 ;; (no variable needed - controlled by CSS)
@@ -119,6 +120,15 @@
   :initial '{"status":"idle","time_left":1500,"time_display":"25:00","sessions":0,"is_break":false,"icon":"","percent":0,"duration":1500}'
   "~/.config/eww/scripts/pomodoro.py listen")
 
+(defpoll updates
+  :interval "1800s"
+  :initial '{"official": 0, "aur": 0, "total": 0, "icon": ""}'
+  "~/.config/eww/scripts/updates.sh")
+
+(deflisten mixer
+  :initial '{"sinks": [], "sink_inputs": []}'
+  "~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer listen")
+
 ;; ============================================================================
 ;; DASHBOARD DATA SOURCES
 ;; ============================================================================
@@ -129,8 +139,10 @@
   "~/.config/eww/scripts/user-info.sh")
 
 (deflisten music
-  :initial '{"active_player":"","available_players":[],"art_url":"","playing":false,"position_percent":0,"title":"","artist":""}'
+  :initial '{"active_player": "No Player", "active_bus": "", "available_players": [], "next_player": "", "prev_player": "", "title": "", "artist": "", "album": "", "art_url": "", "playing": false, "status": "Stopped", "position_percent": 0, "position_time": "0:00", "duration_time": "0:00", "volume": 0.0, "can_play": false, "can_pause": false, "can_go_next": false, "can_go_previous": false, "can_seek": false, "shuffle": false, "loop_status": "None", "playback_rate": 1.0}'
   "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon listen")
-
 ;; Dashboard visibility toggle
 (defvar show-dashboard false)
+
+;; Volume mixer visibility toggle
+(defvar show-volume-mixer false)

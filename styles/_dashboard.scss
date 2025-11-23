@@ -86,7 +86,6 @@
   }
 }
 
-// ... User Info ...
 .user-info-applet {
   padding: $space-md;
   background: $bg-elevated;
@@ -114,7 +113,6 @@
   }
 }
 
-// ... Music Player ...
 .music-player-applet {
   padding: $space-md;
   background: $bg-elevated;
@@ -129,7 +127,12 @@
 
 $album-size: 120px;
 
+.player-main-container {
+  min-height: 180px;
+}
+
 .player-left-section {
+  min-width: 144px;
   margin-right: $space-md;
 }
 .album-section {
@@ -152,6 +155,17 @@ $album-size: 120px;
     min-width: 16px;
     @if $widget-shadow-enabled {
       box-shadow: 0 0 10px $accent-primary;
+    }
+  }
+
+  // Disabled state - invisible but still takes up space
+  &.disabled {
+    opacity: 0;
+
+    &:hover {
+      opacity: 0;
+      min-width: 12px;
+      box-shadow: none;
     }
   }
 }
@@ -208,13 +222,8 @@ $album-size: 120px;
   margin-top: $space-sm;
 }
 
-.player-right-section {
-  min-width: 140px;
-}
-
-// Seek Bar - DOT REMOVED
-.seek-bar {
-  margin-bottom: 4px; // Reduced margin to fit time labels close
+.player-volume-bar {
+  margin-top: $space-sm;
 
   trough {
     min-height: 6px;
@@ -227,13 +236,102 @@ $album-size: 120px;
     border-radius: $radius-full;
   }
 
-  // SLIDER HIDDEN BUT INTERACTIVE
   slider {
     all: unset;
-    min-width: 1px; // Just enough to be technically present
-    min-height: 10px; // Height of touch area
-    background: transparent; // INVISIBLE
-    box-shadow: none; // NO SHADOW/DOT
+    min-width: 10px;
+    min-height: 10px;
+    background: $accent-primary-bright;
+    border-radius: 50%;
+    box-shadow: 0 0 5px $accent-primary;
+    margin: -2px 0;
+  }
+}
+
+.playback-rate-section {
+  margin-top: $space-sm;
+  padding-top: $space-sm;
+  border-top: 1px solid $border-color-normal;
+}
+
+.playback-rate-label {
+  font-size: 10px;
+  color: $fg-tertiary;
+  font-weight: $font-weight-bold;
+  margin-bottom: 2px;
+}
+
+.playback-rate-bar {
+  trough {
+    min-height: 6px;
+    background: $bg-tertiary;
+    border-radius: $radius-full;
+  }
+
+  highlight {
+    background: linear-gradient(to right, $accent-primary-dim, $accent-primary-bright);
+    border-radius: $radius-full;
+  }
+
+  slider {
+    all: unset;
+    min-width: 10px;
+    min-height: 10px;
+    background: $accent-primary-bright;
+    border-radius: 50%;
+    box-shadow: 0 0 5px $accent-primary;
+    margin: -2px 0;
+  }
+}
+
+.playback-rate-value {
+  font-size: 11px;
+  color: $accent-primary;
+  font-weight: $font-weight-bold;
+  margin-top: 2px;
+}
+
+.player-right-section {
+  min-width: 200px;
+  min-height: 180px;
+}
+
+.track-title {
+  font-weight: $font-weight-bold;
+  color: $fg-bright;
+  font-size: $font-size-md;
+  margin-bottom: 4px;
+  min-height: 16px;
+}
+
+.track-artist {
+  font-size: $font-size-sm;
+  color: $accent-primary;
+  margin-bottom: $space-sm;
+  min-height: 14px;
+}
+
+// Seek Bar - DOT REMOVED
+.seek-bar {
+  margin-top: 6px;
+  margin-bottom: 6px;
+
+  trough {
+    min-height: 6px;
+    background: $bg-tertiary;
+    border-radius: $radius-full;
+  }
+
+  highlight {
+    background: $gradient-primary;
+    border-radius: $radius-full;
+  }
+
+  slider {
+    all: unset;
+    min-width: 1px;
+    min-height: 10px;
+    background: transparent;
+    box-shadow: none;
     border: none;
     margin: -2px 0;
   }
@@ -241,7 +339,8 @@ $album-size: 120px;
 
 // Time Labels
 .player-time-labels {
-  margin-bottom: $space-sm;
+  margin-bottom: 8px;
+  min-height: 12px;
 
   .time-current,
   .time-total {
@@ -256,17 +355,23 @@ $album-size: 120px;
 }
 
 .player-controls {
-  margin-top: $space-xs;
+  margin-top: 0;
+  min-height: 44px;
 }
 
 .control-button {
-  min-width: 32px;
-  min-height: 32px;
+  // STRICT DIMENSIONS FOR PERFECT CIRCLES
+  min-width: 38px;
+  min-height: 38px;
+
+  // CENTERING
   padding: 0;
-  font-size: 16px;
+  margin: 0;
+
+  font-size: 18px;
   background: transparent;
   color: $fg-primary;
-  border-radius: 50%;
+  border-radius: 50%; // Ensures circular shape
   border: 1px solid transparent;
   transition: all $transition-fast;
 
@@ -280,13 +385,42 @@ $album-size: 120px;
     }
   }
 
+  // Disabled state - invisible but still takes up space
+  &.disabled {
+    opacity: 0;
+
+    &:hover {
+      background: transparent;
+      color: $fg-primary;
+      border-color: transparent;
+      text-shadow: none;
+      box-shadow: none;
+    }
+  }
+
+  // Shuffle/Loop (Secondary actions)
+  &.small {
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 14px;
+    color: $fg-tertiary;
+
+    &.active {
+      color: $accent-primary;
+      background: rgba($accent-primary, 0.1);
+      border-color: rgba($accent-primary, 0.2);
+    }
+  }
+
+  // Play/Pause (Primary action)
   &.main {
-    min-width: 42px;
-    min-height: 42px;
-    font-size: 22px;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 24px;
     color: $accent-primary;
     background: rgba($accent-primary, 0.1);
     border-color: rgba($accent-primary, 0.3);
+    border-radius: 50%;
 
     &:hover {
       color: $text-on-accent;
