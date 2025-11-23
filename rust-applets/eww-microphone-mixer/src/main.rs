@@ -10,7 +10,7 @@ use std::cell::RefCell;
 use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::{UnixListener, UnixStream};
 use std::rc::Rc;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
 
@@ -28,9 +28,7 @@ struct Cli {
 
 #[derive(Subcommand, Serialize, Deserialize, Debug, Clone, PartialEq)]
 enum CliCommand {
-    Daemon,
     Listen,
-    Ping,
     GetState,
     SetSourceVolume { source_index: u32, volume: u8 },
     SetSourceOutputVolume { index: u32, volume: u8 },
@@ -66,49 +64,33 @@ struct SourceOutputInfo {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 struct MicMixerState {
+    percent: u8,
+    muted: bool,
+    level: u8,
     sources: Vec<SourceInfo>,
     source_outputs: Vec<SourceOutputInfo>,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug)]
 enum DaemonResponse {
     Success,
     Error(String),
     State(MicMixerState),
-    Pong,
 }
 
-trait AudioBackend: Send + Sync {
-    fn get_state(&self) -> Result<MicMixerState, String>;
-    fn set_source_volume(&self, index: u32, percent: u8);
-    fn set_output_volume(&self, index: u32, percent: u8);
-    fn set_source_mute(&self, index: u32, mute: bool);
-    fn toggle_source_mute(&self, index: u32);
-    fn set_output_mute(&self, index: u32, mute: bool);
-    fn toggle_output_mute(&self, index: u32);
-    fn set_default_source(&self, name: &str);
+enum ActorMessage {
+    Command(CliCommand, mpsc::Sender<DaemonResponse>),
+    Refresh,
 }
 
-struct PulseAudioClient {
+// --- PULSEAUDIO ACTOR ---
+
+struct PulseAudioActor {
     mainloop: Rc<RefCell<Mainloop>>,
     context: Rc<RefCell<Context>>,
 }
 
-unsafe impl Send for PulseAudioClient {}
-unsafe impl Sync for PulseAudioClient {}
-
-impl Drop for PulseAudioClient {
-    fn drop(&mut self) {
-        if let Ok(mut ctx) = self.context.try_borrow_mut() {
-            ctx.disconnect();
-        }
-        if let Ok(mut ml) = self.mainloop.try_borrow_mut() {
-            ml.stop();
-        }
-    }
-}
-
-impl PulseAudioClient {
+impl PulseAudioActor {
     fn new() -> Result<Self, String> {
         let mut proplist = Proplist::new().unwrap();
         proplist
@@ -134,24 +116,24 @@ impl PulseAudioClient {
             .borrow_mut()
             .connect(None, ContextFlagSet::NOFLAGS, None)
             .map_err(|e| format!("Failed to connect: {:?}", e))?;
-
         mainloop
             .borrow_mut()
             .start()
             .map_err(|_| "Failed to start mainloop")?;
 
+        // Wait for ready
         let start = std::time::Instant::now();
         loop {
             match context.borrow().get_state() {
                 pulse::context::State::Ready => break,
                 pulse::context::State::Failed | pulse::context::State::Terminated => {
-                    return Err("Context failed".into());
+                    return Err("Context connection failed".into());
                 }
                 _ => {
                     if start.elapsed() > Duration::from_secs(5) {
-                        return Err("Timeout waiting for PA context".into());
+                        return Err("Timeout waiting for PulseAudio".into());
                     }
-                    thread::sleep(Duration::from_millis(10));
+                    thread::sleep(Duration::from_millis(50));
                 }
             }
         }
@@ -159,441 +141,383 @@ impl PulseAudioClient {
         Ok(Self { mainloop, context })
     }
 
-    fn get_default_source_name(&self) -> String {
-        let result = Arc::new(Mutex::new(String::new()));
-        let result_clone = result.clone();
-        let done = Arc::new(Mutex::new(false));
-        let done_clone = done.clone();
+    fn get_state(&self) -> MicMixerState {
+        let mut state = MicMixerState::default();
 
-        let introspector = self.context.borrow().introspect();
-        introspector.get_server_info(move |info| {
-            if let Some(name) = &info.default_source_name {
-                *result_clone.lock().unwrap() = name.to_string();
-            }
-            *done_clone.lock().unwrap() = true;
+        self.mainloop.borrow_mut().lock();
+
+        // 1. Get Default Source
+        let mut introspect = self.context.borrow().introspect();
+        let (tx, rx) = mpsc::channel();
+        introspect.get_server_info(move |info| {
+            let name = info
+                .default_source_name
+                .as_ref()
+                .map(|n| n.to_string())
+                .unwrap_or_default();
+            let _ = tx.send(name);
         });
 
-        for _ in 0..50 {
-            if *done.lock().unwrap() {
-                break;
+        self.mainloop.borrow_mut().unlock();
+        let default_source_name = rx.recv().unwrap_or_default();
+        self.mainloop.borrow_mut().lock();
+
+        // 2. Get Sources
+        let mut introspect = self.context.borrow().introspect();
+        let (tx, rx) = mpsc::channel();
+        introspect.get_source_info_list(move |res| match res {
+            ListResult::Item(item) => {
+                let vol = (item.volume.avg().0 as f64 / Volume::NORMAL.0 as f64 * 100.0) as u8;
+                let _ = tx.send(Some(SourceInfo {
+                    index: item.index,
+                    name: item
+                        .name
+                        .as_ref()
+                        .map(|s| s.to_string())
+                        .unwrap_or_default(),
+                    description: item
+                        .description
+                        .as_ref()
+                        .map(|s| s.to_string())
+                        .unwrap_or_default(),
+                    volume: vol,
+                    muted: item.mute,
+                    is_default: false,
+                }));
             }
-            thread::sleep(Duration::from_millis(5));
+            ListResult::End => {
+                let _ = tx.send(None);
+            }
+            _ => {}
+        });
+
+        self.mainloop.borrow_mut().unlock();
+        while let Ok(Some(mut source)) = rx.recv() {
+            source.is_default = source.name == default_source_name;
+            state.sources.push(source);
+        }
+        self.mainloop.borrow_mut().lock();
+
+        // 3. Get Source Outputs
+        let mut introspect = self.context.borrow().introspect();
+        let (tx, rx) = mpsc::channel();
+        introspect.get_source_output_info_list(move |res| match res {
+            ListResult::Item(item) => {
+                let vol = (item.volume.avg().0 as f64 / Volume::NORMAL.0 as f64 * 100.0) as u8;
+                let name = item
+                    .proplist
+                    .get_str(pulse::proplist::properties::APPLICATION_NAME)
+                    .unwrap_or_else(|| "Unknown".to_string());
+                let _ = tx.send(Some(SourceOutputInfo {
+                    index: item.index,
+                    name,
+                    volume: vol,
+                    muted: item.mute,
+                    source_index: item.source,
+                }));
+            }
+            ListResult::End => {
+                let _ = tx.send(None);
+            }
+            _ => {}
+        });
+
+        self.mainloop.borrow_mut().unlock();
+        while let Ok(Some(output)) = rx.recv() {
+            state.source_outputs.push(output);
         }
 
-        result.lock().unwrap().clone()
-    }
-}
-
-impl AudioBackend for PulseAudioClient {
-    fn get_state(&self) -> Result<MicMixerState, String> {
-        let default_source = self.get_default_source_name();
-        let sources = Arc::new(Mutex::new(Vec::new()));
-        let source_outputs = Arc::new(Mutex::new(Vec::new()));
-
-        let sources_clone = sources.clone();
-        let default_clone = default_source.clone();
-        let sources_done = Arc::new(Mutex::new(false));
-        let sources_done_clone = sources_done.clone();
-
-        self.context
-            .borrow()
-            .introspect()
-            .get_source_info_list(move |res| {
-                if let ListResult::Item(item) = res {
-                    let vol = (item.volume.avg().0 as f64 / Volume::NORMAL.0 as f64 * 100.0) as u8;
-                    sources_clone.lock().unwrap().push(SourceInfo {
-                        index: item.index,
-                        name: item
-                            .name
-                            .as_ref()
-                            .map(|s| s.to_string())
-                            .unwrap_or_default(),
-                        description: item
-                            .description
-                            .as_ref()
-                            .map(|s| s.to_string())
-                            .unwrap_or_default(),
-                        volume: vol,
-                        muted: item.mute,
-                        is_default: item.name.as_ref().map(|s| s.to_string())
-                            == Some(default_clone.clone()),
-                    });
-                } else if let ListResult::End = res {
-                    *sources_done_clone.lock().unwrap() = true;
-                }
-            });
-
-        let outputs_clone = source_outputs.clone();
-        let outputs_done = Arc::new(Mutex::new(false));
-        let outputs_done_clone = outputs_done.clone();
-
-        self.context
-            .borrow()
-            .introspect()
-            .get_source_output_info_list(move |res| {
-                if let ListResult::Item(item) = res {
-                    let vol = (item.volume.avg().0 as f64 / Volume::NORMAL.0 as f64 * 100.0) as u8;
-                    let name = item
-                        .proplist
-                        .get_str(pulse::proplist::properties::APPLICATION_NAME)
-                        .unwrap_or_else(|| "Unknown".to_string());
-                    outputs_clone.lock().unwrap().push(SourceOutputInfo {
-                        index: item.index,
-                        name,
-                        volume: vol,
-                        muted: item.mute,
-                        source_index: item.source,
-                    });
-                } else if let ListResult::End = res {
-                    *outputs_done_clone.lock().unwrap() = true;
-                }
-            });
-
-        for _ in 0..100 {
-            if *sources_done.lock().unwrap() && *outputs_done.lock().unwrap() {
-                break;
-            }
-            thread::sleep(Duration::from_millis(5));
+        // Finalize
+        state
+            .sources
+            .sort_by(|a, b| b.is_default.cmp(&a.is_default));
+        if let Some(def) = state.sources.iter().find(|s| s.is_default) {
+            state.percent = def.volume;
+            state.muted = def.muted;
+        } else if let Some(first) = state.sources.first() {
+            state.percent = first.volume;
+            state.muted = first.muted;
         }
 
-        let mut sources_vec = sources.lock().unwrap().clone();
-        let outputs_vec = source_outputs.lock().unwrap().clone();
-
-        // Sort sources: default/active first, then others
-        sources_vec.sort_by(|a, b| b.is_default.cmp(&a.is_default));
-
-        Ok(MicMixerState {
-            sources: sources_vec,
-            source_outputs: outputs_vec,
-        })
+        state
     }
 
+    // Actions
     fn set_source_volume(&self, index: u32, percent: u8) {
-        let vol_val = (Volume::NORMAL.0 as f64 * (percent.min(150) as f64 / 100.0)) as u32;
-        let volume = Volume(vol_val);
-        let channels = Arc::new(Mutex::new(None));
-        let channels_clone = channels.clone();
-        let done = Arc::new(Mutex::new(false));
-        let done_clone = done.clone();
+        self.mainloop.borrow_mut().lock();
+        let mut introspect = self.context.borrow().introspect();
+        let (tx, rx) = mpsc::channel();
 
-        self.context
-            .borrow()
-            .introspect()
-            .get_source_info_by_index(index, move |res| {
-                if let ListResult::Item(item) = res {
-                    *channels_clone.lock().unwrap() = Some(item.volume);
-                }
-                *done_clone.lock().unwrap() = true;
-            });
-
-        for _ in 0..20 {
-            if *done.lock().unwrap() {
-                break;
+        introspect.get_source_info_by_index(index, move |res| {
+            if let ListResult::Item(item) = res {
+                let _ = tx.send(Some(item.volume));
+            } else if let ListResult::End = res {
+                let _ = tx.send(None);
             }
-            thread::sleep(Duration::from_millis(5));
-        }
+        });
+        self.mainloop.borrow_mut().unlock();
 
-        let vol_opt = channels.lock().unwrap().clone();
-        if let Some(mut cv) = vol_opt {
-            cv.scale(volume);
-            self.context
-                .borrow()
-                .introspect()
-                .set_source_volume_by_index(index, &cv, None);
+        if let Ok(Some(mut cv)) = rx.recv() {
+            self.mainloop.borrow_mut().lock();
+            let mut introspect = self.context.borrow().introspect();
+            let v_val = (Volume::NORMAL.0 as f64 * (percent.min(150) as f64 / 100.0)) as u32;
+            cv.scale(Volume(v_val));
+            introspect.set_source_volume_by_index(index, &cv, None);
+            self.mainloop.borrow_mut().unlock();
         }
     }
 
     fn set_output_volume(&self, index: u32, percent: u8) {
-        let vol_val = (Volume::NORMAL.0 as f64 * (percent.min(150) as f64 / 100.0)) as u32;
-        let volume = Volume(vol_val);
-        let channels = Arc::new(Mutex::new(None));
-        let channels_clone = channels.clone();
-        let done = Arc::new(Mutex::new(false));
-        let done_clone = done.clone();
+        self.mainloop.borrow_mut().lock();
+        let mut introspect = self.context.borrow().introspect();
+        let (tx, rx) = mpsc::channel();
 
-        self.context
-            .borrow()
-            .introspect()
-            .get_source_output_info(index, move |res| {
-                if let ListResult::Item(item) = res {
-                    *channels_clone.lock().unwrap() = Some(item.volume);
-                }
-                *done_clone.lock().unwrap() = true;
-            });
-
-        for _ in 0..20 {
-            if *done.lock().unwrap() {
-                break;
+        introspect.get_source_output_info(index, move |res| {
+            if let ListResult::Item(item) = res {
+                let _ = tx.send(Some(item.volume));
+            } else if let ListResult::End = res {
+                let _ = tx.send(None);
             }
-            thread::sleep(Duration::from_millis(5));
-        }
+        });
+        self.mainloop.borrow_mut().unlock();
 
-        let vol_opt = channels.lock().unwrap().clone();
-        if let Some(mut cv) = vol_opt {
-            cv.scale(volume);
-            self.context
-                .borrow()
-                .introspect()
-                .set_source_output_volume(index, &cv, None);
+        if let Ok(Some(mut cv)) = rx.recv() {
+            self.mainloop.borrow_mut().lock();
+            let mut introspect = self.context.borrow().introspect();
+            let v_val = (Volume::NORMAL.0 as f64 * (percent.min(150) as f64 / 100.0)) as u32;
+            cv.scale(Volume(v_val));
+            introspect.set_source_output_volume(index, &cv, None);
+            self.mainloop.borrow_mut().unlock();
         }
     }
 
     fn set_source_mute(&self, index: u32, mute: bool) {
-        self.context
-            .borrow()
-            .introspect()
-            .set_source_mute_by_index(index, mute, None);
-    }
-
-    fn toggle_source_mute(&self, index: u32) {
-        let muted = Arc::new(Mutex::new(None));
-        let muted_clone = muted.clone();
-        let done = Arc::new(Mutex::new(false));
-        let done_clone = done.clone();
-
-        self.context
-            .borrow()
-            .introspect()
-            .get_source_info_by_index(index, move |res| {
-                if let ListResult::Item(item) = res {
-                    *muted_clone.lock().unwrap() = Some(item.mute);
-                }
-                *done_clone.lock().unwrap() = true;
-            });
-
-        for _ in 0..20 {
-            if *done.lock().unwrap() {
-                break;
-            }
-            thread::sleep(Duration::from_millis(5));
-        }
-
-        let is_muted_opt = *muted.lock().unwrap();
-        if let Some(is_muted) = is_muted_opt {
-            self.context
-                .borrow()
-                .introspect()
-                .set_source_mute_by_index(index, !is_muted, None);
-        }
+        self.mainloop.borrow_mut().lock();
+        let mut introspect = self.context.borrow().introspect();
+        introspect.set_source_mute_by_index(index, mute, None);
+        self.mainloop.borrow_mut().unlock();
     }
 
     fn set_output_mute(&self, index: u32, mute: bool) {
-        self.context
-            .borrow()
-            .introspect()
-            .set_source_output_mute(index, mute, None);
+        self.mainloop.borrow_mut().lock();
+        let mut introspect = self.context.borrow().introspect();
+        introspect.set_source_output_mute(index, mute, None);
+        self.mainloop.borrow_mut().unlock();
+    }
+
+    fn toggle_source_mute(&self, index: u32) {
+        self.mainloop.borrow_mut().lock();
+        let mut introspect = self.context.borrow().introspect();
+        let (tx, rx) = mpsc::channel();
+
+        introspect.get_source_info_by_index(index, move |res| {
+            if let ListResult::Item(item) = res {
+                let _ = tx.send(Some(item.mute));
+            } else if let ListResult::End = res {
+                let _ = tx.send(None);
+            }
+        });
+        self.mainloop.borrow_mut().unlock();
+
+        if let Ok(Some(muted)) = rx.recv() {
+            self.mainloop.borrow_mut().lock();
+            let mut introspect = self.context.borrow().introspect();
+            introspect.set_source_mute_by_index(index, !muted, None);
+            self.mainloop.borrow_mut().unlock();
+        }
     }
 
     fn toggle_output_mute(&self, index: u32) {
-        let muted = Arc::new(Mutex::new(None));
-        let muted_clone = muted.clone();
-        let done = Arc::new(Mutex::new(false));
-        let done_clone = done.clone();
+        self.mainloop.borrow_mut().lock();
+        let mut introspect = self.context.borrow().introspect();
+        let (tx, rx) = mpsc::channel();
 
-        self.context
-            .borrow()
-            .introspect()
-            .get_source_output_info(index, move |res| {
-                if let ListResult::Item(item) = res {
-                    *muted_clone.lock().unwrap() = Some(item.mute);
-                }
-                *done_clone.lock().unwrap() = true;
-            });
-
-        for _ in 0..20 {
-            if *done.lock().unwrap() {
-                break;
+        introspect.get_source_output_info(index, move |res| {
+            if let ListResult::Item(item) = res {
+                let _ = tx.send(Some(item.mute));
+            } else if let ListResult::End = res {
+                let _ = tx.send(None);
             }
-            thread::sleep(Duration::from_millis(5));
-        }
+        });
+        self.mainloop.borrow_mut().unlock();
 
-        let is_muted_opt = *muted.lock().unwrap();
-        if let Some(is_muted) = is_muted_opt {
-            self.context
-                .borrow()
-                .introspect()
-                .set_source_output_mute(index, !is_muted, None);
+        if let Ok(Some(muted)) = rx.recv() {
+            self.mainloop.borrow_mut().lock();
+            let mut introspect = self.context.borrow().introspect();
+            introspect.set_source_output_mute(index, !muted, None);
+            self.mainloop.borrow_mut().unlock();
         }
     }
 
     fn set_default_source(&self, name: &str) {
+        self.mainloop.borrow_mut().lock();
         self.context.borrow_mut().set_default_source(name, |_| {});
+        self.mainloop.borrow_mut().unlock();
     }
 }
 
-fn run_daemon<B: AudioBackend + 'static>(socket_path: &str, backend: B) -> anyhow::Result<()> {
+// --- SERVER LOGIC ---
+
+fn run_server(socket_path: &str) -> anyhow::Result<()> {
     if std::path::Path::new(socket_path).exists() {
-        if let Ok(_) = std::os::unix::net::UnixStream::connect(socket_path) {
-            eprintln!("Daemon already running at {}", socket_path);
-            return Ok(());
-        }
         let _ = std::fs::remove_file(socket_path);
     }
 
-    let listener = UnixListener::bind(socket_path)?;
-    let client = Arc::new(Mutex::new(backend));
+    let (sender, receiver) = mpsc::channel::<ActorMessage>();
+    let sender_sock = sender.clone();
 
-    let subscribers: Arc<Mutex<Vec<std::sync::mpsc::Sender<String>>>> =
-        Arc::new(Mutex::new(Vec::new()));
-
-    let sub_client = client.clone();
-    let sub_list = subscribers.clone();
+    // 1. ACTOR THREAD
     thread::spawn(move || {
-        let mut last_state_json = String::new();
-        loop {
-            thread::sleep(Duration::from_millis(200));
-            if sub_list.lock().unwrap().is_empty() {
-                continue;
+        let actor = match PulseAudioActor::new() {
+            Ok(a) => a,
+            Err(e) => {
+                eprintln!("Failed to init PulseAudio: {}", e);
+                return;
             }
+        };
 
-            if let Ok(client) = sub_client.lock() {
-                if let Ok(state) = client.get_state() {
+        let init = actor.get_state();
+        if let Ok(json) = serde_json::to_string(&init) {
+            println!("{}", json);
+        }
+
+        while let Ok(msg) = receiver.recv() {
+            match msg {
+                ActorMessage::Refresh => {
+                    let state = actor.get_state();
                     if let Ok(json) = serde_json::to_string(&state) {
-                        if json != last_state_json {
-                            last_state_json = json.clone();
-                            let mut list = sub_list.lock().unwrap();
-                            list.retain(|tx| tx.send(json.clone()).is_ok());
+                        println!("{}", json);
+                    }
+                }
+                ActorMessage::Command(cmd, reply_tx) => {
+                    let mut success = true;
+                    match cmd {
+                        CliCommand::GetState => {
+                            let state = actor.get_state();
+                            let _ = reply_tx.send(DaemonResponse::State(state));
+                            continue;
                         }
+                        CliCommand::Kill => std::process::exit(0),
+
+                        CliCommand::SetSourceVolume {
+                            source_index,
+                            volume,
+                        } => actor.set_source_volume(source_index, volume),
+                        CliCommand::SetSourceOutputVolume { index, volume } => {
+                            actor.set_output_volume(index, volume)
+                        }
+                        CliCommand::MuteSource { source_index, mute } => {
+                            actor.set_source_mute(source_index, mute)
+                        }
+                        CliCommand::MuteSourceOutput { index, mute } => {
+                            actor.set_output_mute(index, mute)
+                        }
+                        CliCommand::ToggleMuteSource { source_index } => {
+                            actor.toggle_source_mute(source_index)
+                        }
+                        CliCommand::ToggleMuteSourceOutput { index } => {
+                            actor.toggle_output_mute(index)
+                        }
+                        CliCommand::SetDefaultSource { source_name } => {
+                            actor.set_default_source(&source_name)
+                        }
+
+                        CliCommand::ToggleMuteDefault => {
+                            let s = actor.get_state();
+                            if let Some(def) = s.sources.iter().find(|x| x.is_default) {
+                                actor.toggle_source_mute(def.index);
+                            }
+                        }
+                        CliCommand::VolumeUp => {
+                            let s = actor.get_state();
+                            if let Some(def) = s.sources.iter().find(|x| x.is_default) {
+                                actor.set_source_volume(def.index, (def.volume + 5).min(100));
+                            }
+                        }
+                        CliCommand::VolumeDown => {
+                            let s = actor.get_state();
+                            if let Some(def) = s.sources.iter().find(|x| x.is_default) {
+                                actor.set_source_volume(def.index, def.volume.saturating_sub(5));
+                            }
+                        }
+                        _ => {
+                            success = false;
+                        }
+                    }
+
+                    if success {
+                        let _ = reply_tx.send(DaemonResponse::Success);
+                        let state = actor.get_state();
+                        if let Ok(json) = serde_json::to_string(&state) {
+                            println!("{}", json);
+                        }
+                    } else {
+                        let _ = reply_tx.send(DaemonResponse::Error("Unknown command".into()));
                     }
                 }
             }
         }
     });
 
+    // 2. MONITOR THREAD
+    let sender_timer = sender.clone();
+    thread::spawn(move || {
+        loop {
+            thread::sleep(Duration::from_secs(2));
+            let _ = sender_timer.send(ActorMessage::Refresh);
+        }
+    });
+
+    // 3. LISTENER THREAD
+    let listener = UnixListener::bind(socket_path)?;
     for stream in listener.incoming() {
-        match stream {
-            Ok(mut stream) => {
-                let client = client.clone();
-                let sub_list = subscribers.clone();
-                thread::spawn(move || {
-                    let mut de = serde_json::Deserializer::from_reader(&stream);
-                    if let Ok(cmd) = CliCommand::deserialize(&mut de) {
-                        match cmd {
-                            CliCommand::Daemon => {}
-                            CliCommand::Kill => std::process::exit(0),
-                            CliCommand::Ping => {
-                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Pong);
-                            }
-                            CliCommand::Listen => {
-                                let (tx, rx) = std::sync::mpsc::channel();
-                                if let Ok(c) = client.lock() {
-                                    if let Ok(s) = c.get_state() {
-                                        if let Ok(j) = serde_json::to_string(&s) {
-                                            let _ = write!(stream, "{}\n", j);
-                                        }
-                                    }
-                                }
-                                sub_list.lock().unwrap().push(tx);
-                                while let Ok(msg) = rx.recv() {
-                                    if write!(stream, "{}\n", msg).is_err() {
-                                        break;
-                                    }
-                                }
-                            }
-                            CliCommand::GetState => {
-                                let res = match client.lock().unwrap().get_state() {
-                                    Ok(s) => DaemonResponse::State(s),
-                                    Err(e) => DaemonResponse::Error(e),
-                                };
-                                let _ = serde_json::to_writer(&stream, &res);
-                            }
-                            CliCommand::SetSourceVolume {
-                                source_index,
-                                volume,
-                            } => {
-                                client
-                                    .lock()
-                                    .unwrap()
-                                    .set_source_volume(source_index, volume);
-                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
-                            }
-                            CliCommand::SetSourceOutputVolume { index, volume } => {
-                                client.lock().unwrap().set_output_volume(index, volume);
-                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
-                            }
-                            CliCommand::MuteSource { source_index, mute } => {
-                                client.lock().unwrap().set_source_mute(source_index, mute);
-                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
-                            }
-                            CliCommand::ToggleMuteSource { source_index } => {
-                                client.lock().unwrap().toggle_source_mute(source_index);
-                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
-                            }
-                            CliCommand::MuteSourceOutput { index, mute } => {
-                                client.lock().unwrap().set_output_mute(index, mute);
-                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
-                            }
-                            CliCommand::ToggleMuteSourceOutput { index } => {
-                                client.lock().unwrap().toggle_output_mute(index);
-                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
-                            }
-                            CliCommand::ToggleMuteDefault => {
-                                if let Ok(state) = client.lock().unwrap().get_state() {
-                                    if let Some(default_source) = state.sources.iter().find(|s| s.is_default) {
-                                        client.lock().unwrap().toggle_source_mute(default_source.index);
-                                    }
-                                }
-                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
-                            }
-                            CliCommand::VolumeUp => {
-                                if let Ok(state) = client.lock().unwrap().get_state() {
-                                    if let Some(default_source) = state.sources.iter().find(|s| s.is_default) {
-                                        let new_vol = (default_source.volume + 5).min(100);
-                                        client.lock().unwrap().set_source_volume(default_source.index, new_vol);
-                                    }
-                                }
-                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
-                            }
-                            CliCommand::VolumeDown => {
-                                if let Ok(state) = client.lock().unwrap().get_state() {
-                                    if let Some(default_source) = state.sources.iter().find(|s| s.is_default) {
-                                        let new_vol = default_source.volume.saturating_sub(5);
-                                        client.lock().unwrap().set_source_volume(default_source.index, new_vol);
-                                    }
-                                }
-                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
-                            }
-                            CliCommand::SetDefaultSource { source_name } => {
-                                client.lock().unwrap().set_default_source(&source_name);
-                                let _ = serde_json::to_writer(&stream, &DaemonResponse::Success);
-                            }
-                        }
-                    }
-                });
-            }
-            Err(_) => {
-                break;
-            }
+        if let Ok(stream) = stream {
+            let sender = sender_sock.clone();
+            thread::spawn(move || {
+                handle_client(stream, sender);
+            });
         }
     }
+
     Ok(())
 }
 
-fn send_client_command(socket_path: &str, cmd: CliCommand) -> anyhow::Result<()> {
-    let stream = UnixStream::connect(socket_path).map_err(|_| {
-        anyhow::anyhow!("Daemon not running at {}. Run 'daemon' first.", socket_path)
-    })?;
+fn handle_client(stream: UnixStream, sender: mpsc::Sender<ActorMessage>) {
+    let mut reader = BufReader::new(stream);
+    let mut line = String::new();
 
-    if let CliCommand::Listen = cmd {
-        serde_json::to_writer(&stream, &cmd)?;
-        let reader = BufReader::new(stream);
-        for line in reader.lines() {
-            println!("{}", line?);
+    if let Ok(_) = reader.read_line(&mut line) {
+        if let Ok(cmd) = serde_json::from_str::<CliCommand>(line.trim()) {
+            let (tx, rx) = mpsc::channel();
+            if sender.send(ActorMessage::Command(cmd, tx)).is_ok() {
+                if let Ok(response) = rx.recv() {
+                    let mut stream = reader.into_inner();
+                    if let Ok(json) = serde_json::to_string(&response) {
+                        let _ = stream.write_all(json.as_bytes());
+                        let _ = stream.write_all(b"\n");
+                    }
+                }
+            }
         }
-        return Ok(());
     }
+}
 
-    serde_json::to_writer(&stream, &cmd)?;
+fn send_command(socket_path: &str, cmd: CliCommand) -> anyhow::Result<()> {
+    let mut stream =
+        UnixStream::connect(socket_path).map_err(|_| anyhow::anyhow!("Daemon not running"))?;
 
-    let mut de = serde_json::Deserializer::from_reader(stream);
-    let response = DaemonResponse::deserialize(&mut de)?;
+    let json = serde_json::to_string(&cmd)?;
+    stream.write_all(json.as_bytes())?;
+    stream.write_all(b"\n")?;
+
+    let mut reader = BufReader::new(stream);
+    let mut line = String::new();
+    reader.read_line(&mut line)?;
+
+    let response: DaemonResponse = serde_json::from_str(&line)?;
 
     match response {
         DaemonResponse::Success => Ok(()),
-        DaemonResponse::Pong => {
-            println!("Pong");
-            Ok(())
-        }
         DaemonResponse::State(s) => {
             println!("{}", serde_json::to_string(&s)?);
             Ok(())
@@ -604,12 +528,8 @@ fn send_client_command(socket_path: &str, cmd: CliCommand) -> anyhow::Result<()>
 
 fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
-
     match args.command {
-        CliCommand::Daemon => {
-            let client = PulseAudioClient::new().map_err(|e| anyhow::anyhow!(e))?;
-            run_daemon(&args.socket, client)
-        }
-        cmd => send_client_command(&args.socket, cmd),
+        CliCommand::Listen => run_server(&args.socket),
+        cmd => send_command(&args.socket, cmd),
     }
 }
