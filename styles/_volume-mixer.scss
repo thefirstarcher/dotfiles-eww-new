@@ -51,6 +51,68 @@
   @if $widget-shadow-enabled {
     box-shadow: $shadow-sm;
   }
+
+  scrolledwindow {
+    scrollbar.vertical {
+      // Width of the entire scrollbar area (affects clickable area)
+      min-width: 12px;
+      background-color: transparent;
+      margin: 0;
+      padding: 0;
+
+      // The track (trough)
+      trough {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: $radius-sm;
+        border: none;
+        margin: 0;
+      }
+
+      // The draggable handle (slider)
+      slider {
+        background-color: rgba($fg-secondary, 0.4);
+        border-radius: $radius-full;
+        min-width: 6px; // Visual width of the bar
+        margin: 3px; // Padding inside the 12px trough (12px - 6px)/2 = 3px
+        border: none;
+        min-height: 40px; // Minimum size so it's always grabbable
+
+        &:hover {
+          background-color: $accent-primary;
+        }
+
+        &:active {
+          background-color: $accent-primary-bright;
+        }
+      }
+    }
+    undershoot.top {
+      background-color: transparent;
+      background-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.8),
+        transparent
+      );
+      background-size: 100% 20px; // <--- Reduced from 40px to 20px
+      background-repeat: no-repeat;
+      background-origin: content-box;
+      background-position: center top;
+    }
+
+    // Bottom Shade (appears when you can scroll down)
+    undershoot.bottom {
+      background-color: transparent;
+      background-image: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.8),
+        transparent
+      );
+      background-size: 100% 20px; // <--- Reduced from 40px to 20px
+      background-repeat: no-repeat;
+      background-origin: content-box;
+      background-position: center bottom;
+    }
+  }
 }
 
 .mixer-section-title {

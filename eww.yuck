@@ -33,7 +33,7 @@
   :exclusive false
   ;; Auto-close when mouse leaves the dashboard
   (eventbox
-    :onhoverlost "eww close dashboard && eww update show-dashboard=false"
+    :onhoverlost "eww close dashboard"
     (dashboard_layout))
 )
 
@@ -143,7 +143,7 @@
     :cursor "pointer"
     :tooltip "Toggle Dashboard"
     (button
-      :onclick "~/.config/eww/scripts/toggle-dashboard.sh"
+      :onclick "eww open dashboard --toggle"
       :class "dashboard-toggle ${show-dashboard ? 'active' : ''}"
       "󰍜")
   )
@@ -313,7 +313,7 @@
     :onscroll "if [ '{}' = 'up' ]; then ~/.config/eww/scripts/volume.sh up; else ~/.config/eww/scripts/volume.sh down; fi"
     :cursor "pointer"
     :onclick "~/.config/eww/scripts/volume.sh toggle"
-    :onrightclick "~/.config/eww/scripts/toggle-volume-mixer.sh &"
+    :onrightclick "eww open volume-mixer --toggle"
     (box
       :class "volume-applet ${volume.muted ? 'muted' : ''}"
       :orientation "h"
@@ -445,7 +445,8 @@
       :spacing 8
       (eventbox
         :cursor "pointer"
-        :onclick "~/.config/eww/scripts/volume-mixer-cmd.sh mute-sink ${sink.index}"
+        ;; UPDATED: Uses toggle-mute-sink
+        :onclick "~/.config/eww/scripts/volume-manager.sh toggle-mute-sink ${sink.index}"
         (label :class "mixer-icon" :text "${sink.muted ? '󰖁' : '󰕾'}")
       )
       (label :class "mixer-name" :text "${sink.description}" :limit-width 30 :halign "start")
@@ -456,7 +457,8 @@
       :value "${sink.volume}"
       :min 0
       :max 150
-      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/scripts/volume-mixer-cmd.sh set-sink-volume ${sink.index} $vol'"
+      ;; UPDATED: Uses set-sink-volume with correct arg order
+      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/scripts/volume-manager.sh set-sink-volume ${sink.index} $vol'"
     )
     (box
       :visible "${!sink.is_default}"
@@ -465,7 +467,8 @@
         :cursor "pointer"
         (button
           :class "set-default-btn"
-          :onclick "~/.config/eww/scripts/volume-mixer-cmd.sh set-default-sink ${sink.name}"
+          ;; UPDATED: Uses set-default-sink
+          :onclick "~/.config/eww/scripts/volume-manager.sh set-default-sink \"${sink.name}\""
           "Set as Default")
       )
     )
@@ -484,7 +487,8 @@
       :spacing 8
       (eventbox
         :cursor "pointer"
-        :onclick "~/.config/eww/scripts/volume-mixer-cmd.sh mute-sink-input ${app.index}"
+        ;; UPDATED: Uses toggle-mute-sink-input
+        :onclick "~/.config/eww/scripts/volume-manager.sh toggle-mute-sink-input ${app.index}"
         (label :class "mixer-icon" :text "${app.muted ? '󰖁' : '󰕾'}")
       )
       (label :class "mixer-name" :text "${app.name}" :limit-width 30 :halign "start")
@@ -495,7 +499,8 @@
       :value "${app.volume}"
       :min 0
       :max 150
-      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/scripts/volume-mixer-cmd.sh set-sink-input-volume ${app.index} $vol'"
+      ;; UPDATED: Uses set-sink-input-volume
+      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/scripts/volume-manager.sh set-sink-input-volume ${app.index} $vol'"
     )
   )
 )
@@ -522,7 +527,7 @@
         :class "dashboard-close-btn"
         :halign "end"
         :valign "start"
-        :onclick "eww close dashboard && eww update show-dashboard=false"
+        :onclick "eww close dashboard"
         :tooltip "Close Dashboard"
         "󰅖")
     )

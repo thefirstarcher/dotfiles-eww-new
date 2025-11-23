@@ -127,7 +127,7 @@
 
 (deflisten mixer
   :initial '{"sinks": [], "sink_inputs": []}'
-  "~/.config/eww/rust-applets/eww-volume-mixer/target/release/eww-volume-mixer listen")
+  "~/.config/eww/scripts/volume-manager.sh listen")
 
 ;; ============================================================================
 ;; DASHBOARD DATA SOURCES
