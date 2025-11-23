@@ -305,19 +305,43 @@
 ;; ============================================================================
 (defwidget volume-widget []
   (eventbox
-    :onscroll "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer volume-{}"
+    :onscroll "if [ '{}' == 'up' ]; then ~/.config/eww/scripts/volume-commands.sh volume-up; else ~/.config/eww/scripts/volume-commands.sh volume-down; fi"
     :cursor "pointer"
-    :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer toggle-mute-default"
+    :onclick "~/.config/eww/scripts/volume-commands.sh toggle-mute-default"
     :onrightclick "eww open volume-mixer --toggle"
     (box
-      :class "volume-applet ${mixer_state.volume_muted ? 'muted' : ''}"
+      :class "volume-applet ${mixer_state.volume_muted ? 'muted' : ''} ${arraylength(mixer_state.sink_inputs) > 0 ? 'playing' : ''}"
       :orientation "h"
       :spacing 10
       :space-evenly true
-      (label :class "volume-icon" :text "${mixer_state.volume_muted ? '󰖁' : mixer_state.volume_percent >= 70 ? '󰕾' : mixer_state.volume_percent >= 30 ? '󰖀' : mixer_state.volume_percent > 0 ? '󰕿' : '󰖁'}")
+
+      (label
+        :class "volume-icon"
+        :text "${mixer_state.volume_muted
+          ? '󰖁'
+          : mixer_state.volume_percent >= 70 ? '󰕾'
+          : mixer_state.volume_percent >= 30 ? '󰖀'
+          : mixer_state.volume_percent > 0  ? '󰕿'
+          : '󰖁'}"
+      )
+
       (overlay
-        (scale :class "volume-scale" :value "${mixer_state.volume_percent}" :orientation "v" :flipped true :min 0 :max 100 :active false)
-        (scale :class "audio-level-scale" :value "${mixer_state.volume_level}" :orientation "v" :flipped true :min 0 :max 100 :active false)
+        (scale
+          :class "volume-scale"
+          :orientation "v"
+          :flipped true
+          :min 0
+          :max 100
+          :value "${mixer_state.volume_percent}"
+          :active false)
+        (scale
+          :class "audio-level-scale"
+          :orientation "v"
+          :flipped true
+          :min 0
+          :max 100
+          :value "${mixer_state.volume_level}"
+          :active false)
       )
     )
   )
@@ -328,23 +352,48 @@
 ;; ============================================================================
 (defwidget microphone-widget []
   (eventbox
-    :onscroll "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer mic-volume-{}"
+    :onscroll "if [ '{}' == 'up' ]; then ~/.config/eww/scripts/microphone-commands.sh volume-up; else ~/.config/eww/scripts/microphone-commands.sh volume-down; fi"
     :cursor "pointer"
-    :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer toggle-mute-mic-default"
+    :onclick "~/.config/eww/scripts/microphone-commands.sh toggle-mute-default"
     :onrightclick "eww open microphone-mixer --toggle"
     (box
-      :class "microphone-applet ${mixer_state.mic_muted ? 'muted' : ''}"
+      :class "microphone-applet ${mixer_state.mic_muted ? 'muted' : ''} ${arraylength(mixer_state.source_outputs) > 0 ? 'recording' : ''}"
       :orientation "h"
       :spacing 10
       :space-evenly true
-      (label :class "microphone-icon" :text "${mixer_state.mic_muted ? '󰍭' : mixer_state.mic_percent >= 70 ? '󰍬' : mixer_state.mic_percent >= 30 ? '󰍬' : mixer_state.mic_percent > 0 ? '󰍬' : '󰍭'}")
+
+      (label
+        :class "microphone-icon"
+        :text "${mixer_state.mic_muted
+           ? '󰍭'
+           : mixer_state.mic_percent >= 70 ? '󰍬'
+           : mixer_state.mic_percent >= 30 ? '󰍬'
+           : mixer_state.mic_percent > 0  ? '󰍬'
+           : '󰍭'}"
+      )
+
       (overlay
-        (scale :class "microphone-scale" :value "${mixer_state.mic_percent}" :orientation "v" :flipped true :min 0 :max 100 :active false)
-        (scale :class "input-level-scale" :value "${mixer_state.mic_level}" :orientation "v" :flipped true :min 0 :max 100 :active false)
+        (scale
+          :class "microphone-scale"
+          :orientation "v"
+          :flipped true
+          :min 0
+          :max 100
+          :value "${mixer_state.mic_percent}"
+          :active false)
+        (scale
+          :class "input-level-scale"
+          :orientation "v"
+          :flipped true
+          :min 0
+          :max 100
+          :value "${mixer_state.mic_level}"
+          :active false)
       )
     )
   )
 )
+
 
 (defwidget battery-widget []
   (box
@@ -462,7 +511,7 @@
       :spacing 8
       (eventbox
         :cursor "pointer"
-        :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer toggle-mute-sink ${sink.index}"
+        :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer toggle-mute sink ${sink.index}"
         (label :class "mixer-icon" :text "${sink.muted ? '󰖁' : '󰕾'}")
       )
       (label :class "mixer-name" :text "${sink.description}" :limit-width 30 :halign "start")
@@ -473,7 +522,7 @@
       :value "${sink.volume}"
       :min 0
       :max 150
-      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-sink-volume ${sink.index} $vol'"
+      :onchange "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-volume sink ${sink.index} $(printf %.0f {})"
     )
     (box
       :visible "${!sink.is_default}"
@@ -482,7 +531,7 @@
         :cursor "pointer"
         (button
           :class "set-default-btn"
-          :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-default-sink \"${sink.name}\""
+          :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-default sink \"${sink.name}\""
           "Set as Default")
       )
     )
@@ -501,7 +550,7 @@
       :spacing 8
       (eventbox
         :cursor "pointer"
-        :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer toggle-mute-sink-input ${app.index}"
+        :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer toggle-mute sink-input ${app.index}"
         (label :class "mixer-icon" :text "${app.muted ? '󰖁' : '󰕾'}")
       )
       (label :class "mixer-name" :text "${app.name}" :limit-width 30 :halign "start")
@@ -512,7 +561,7 @@
       :value "${app.volume}"
       :min 0
       :max 150
-      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-sink-input-volume ${app.index} $vol'"
+      :onchange "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-volume sink-input ${app.index} $(printf %.0f {})"
     )
   )
 )
@@ -612,7 +661,7 @@
       :spacing 8
       (eventbox
         :cursor "pointer"
-        :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer toggle-mute-source ${source.index}"
+        :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer toggle-mute source ${source.index}"
         :tooltip "${source.muted ? 'Unmute' : 'Mute'}"
         (label
           :class "mixer-icon mic-icon"
@@ -634,7 +683,7 @@
       :value "${source.volume}"
       :min 0
       :max 150
-      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-source-volume ${source.index} $vol'"
+      :onchange "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-volume source ${source.index} $(printf %.0f {})"
       :tooltip "Volume: ${source.volume}%"
     )
     (box
@@ -655,7 +704,7 @@
           :cursor "pointer"
           (button
             :class "set-default-btn mic-set-default-btn"
-            :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-default-source \"${source.name}\""
+            :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-default source \"${source.name}\""
             :tooltip "Make this the default input device"
             "Set as Default")
         )
@@ -676,7 +725,7 @@
       :spacing 8
       (eventbox
         :cursor "pointer"
-        :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer toggle-mute-source-output ${app.index}"
+        :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer toggle-mute source-output ${app.index}"
         :tooltip "${app.muted ? 'Unmute' : 'Mute'}"
         (label
           :class "mixer-icon mic-icon"
@@ -698,7 +747,7 @@
       :value "${app.volume}"
       :min 0
       :max 150
-      :onchange "bash -c 'vol={}; [ $vol -gt 100 ] && vol=100; ~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-source-output-volume ${app.index} $vol'"
+      :onchange "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-volume source-output ${app.index} $(printf %.0f {})"
       :tooltip "Volume: ${app.volume}%"
     )
   )

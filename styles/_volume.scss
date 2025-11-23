@@ -41,6 +41,17 @@ $volume-shadow-muted: $glow-size-sm $glow-red-subtle;
 
   transition: all $transition-normal;
 
+  // Playing state (audio active)
+  &.playing {
+    @if $widget-border-enabled {
+      border-color: $accent-primary;
+    }
+
+    .volume-icon {
+      color: $accent-primary;
+    }
+  }
+
   // Muted state
   &.muted {
     @if $widget-bg-enabled {

@@ -41,6 +41,17 @@ $microphone-shadow-muted: $glow-size-sm $glow-red-subtle;
 
   transition: all $transition-normal;
 
+  // Recording state (audio input active)
+  &.recording {
+    @if $widget-border-enabled {
+      border-color: $accent-red;
+    }
+
+    .microphone-icon {
+      color: $accent-red;
+    }
+  }
+
   // Muted state
   &.muted {
     @if $widget-bg-enabled {

@@ -86,8 +86,6 @@
   :initial '{"volume_percent":0,"volume_muted":false,"volume_level":0,"sinks":[],"sink_inputs":[],"mic_percent":0,"mic_muted":false,"mic_level":0,"sources":[],"source_outputs":[]}'
   "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer listen")
 
-;; Derived data for widgets (extracted from mixer_state in eww.yuck using jq)
-
 (defpoll network
   :interval "5s"
   :initial '{"type": "disconnected", "icon": "󰤭", "name": "", "percent": 0}'

@@ -22,7 +22,7 @@ fn get_layout_code(layout_name: &str) -> String {
     if lower.contains("english") || lower.contains("us") {
         "us".to_string()
     } else if lower.contains("ukrain") {
-        "ua".to_string()
+        "uk".to_string()
     } else if lower.contains("russian") {
         "ru".to_string()
     } else if lower.contains("german") {
@@ -71,11 +71,10 @@ fn get_layout_code(layout_name: &str) -> String {
 fn code_to_flag(mut code: String) -> String {
     // Special mappings
     code = match code.as_str() {
-        "uk" => "gb".to_string(),
+        "uk" => "ua".to_string(),
         "en" => "us".to_string(),
         "ar" => "sa".to_string(),
         "eng" => "us".to_string(),
-        "ukr" => "ua".to_string(),
         "rus" => "ru".to_string(),
         "he" => "il".to_string(),
         "el" => "gr".to_string(),
@@ -113,7 +112,8 @@ fn code_to_flag(mut code: String) -> String {
         let c1 = chars[0] as u32 - 'A' as u32 + 0x1F1E6;
         let c2 = chars[1] as u32 - 'A' as u32 + 0x1F1E6;
 
-        format!("{}{}",
+        format!(
+            "{}{}",
             char::from_u32(c1).unwrap_or('?'),
             char::from_u32(c2).unwrap_or('?')
         )
