@@ -1,0 +1,37 @@
+// ============================================================================
+// TEXT COMPONENTS
+// ============================================================================
+// Text styling with variants using design tokens
+//
+// Usage: (label :class "text" "Normal text")
+//        (label :class "text-title" "Title")
+//        (label :class "text-subtitle" "Subtitle")
+
+.text {
+  color: $fg-primary;
+  font-size: $font-size-md;
+}
+
+.text-title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $fg-bright;
+}
+
+.text-subtitle {
+  font-size: $font-size-sm;
+  color: $fg-secondary;
+}
+
+.text-dim {
+  color: $fg-tertiary;
+  font-size: $font-size-md;
+}
+
+.text-xs {
+  font-size: $font-size-xs;
+}
+
+.text-xl {
+  font-size: $font-size-xl;
+}

@@ -1,0 +1,46 @@
+// ============================================================================
+// TIME APPLET COMPONENT
+// ============================================================================
+// Clock and date display (toggles between time and date on click)
+
+.time-applet {
+  padding: $widget-padding-vertical $space-lg; // Height control + wider horizontal spacing
+  margin: 0;
+  border-radius: $time-radius;
+
+  @if $widget-bg-enabled {
+    background: $time-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $time-border;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+
+  &:hover {
+    @if $widget-border-enabled {
+      border-color: $time-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $time-shadow-hover;
+    }
+  }
+}
+
+.time-display {
+  color: $time-text-color;
+  font-size: $time-text-size;
+  font-weight: $time-text-weight;
+}
+
+.date-display {
+  color: $date-text-color;
+  font-size: $date-text-size;
+  font-weight: $date-text-weight;
+}

@@ -1,0 +1,48 @@
+// ============================================================================
+// ICON COMPONENT
+// ============================================================================
+// Icon styling using design tokens
+//
+// Usage: (label :class "icon" "󰊠")
+//        (label :class "icon icon-active" "")
+
+// Component variables - select from theme primitives
+$icon-color-default: $fg-secondary;
+$icon-color-active: $accent-primary-bright;
+$icon-glow-active: $glow-size-md $glow-primary;
+
+.icon {
+  color: $icon-color-default;
+  font-size: $icon-size-md;
+  min-width: $icon-size-md;
+  min-height: $icon-size-md;
+  transition: all $transition-fast;
+
+  &:hover:not(.icon-active) {
+    color: $accent-primary;
+
+    @if $widget-shadow-enabled {
+      text-shadow: $glow-size-sm $glow-primary-subtle;
+    }
+  }
+
+  &.icon-active {
+    color: $icon-color-active;
+
+    @if $widget-shadow-enabled {
+      text-shadow: $icon-glow-active;
+    }
+  }
+
+  &.icon-sm {
+    font-size: $icon-size-sm;
+    min-width: $icon-size-sm;
+    min-height: $icon-size-sm;
+  }
+
+  &.icon-lg {
+    font-size: $icon-size-lg;
+    min-width: $icon-size-lg;
+    min-height: $icon-size-lg;
+  }
+}

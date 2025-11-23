@@ -1,0 +1,107 @@
+// ============================================================================
+// NOTIFICATIONS COMPONENT
+// ============================================================================
+// Notification counter with DND indicator
+
+// Component variables - select from theme primitives
+$notifications-bg: $bg-elevated;
+$notifications-bg-active: rgba($accent-primary-dim, 0.2);
+$notifications-bg-dnd: rgba($accent-red-dim, 0.15);
+$notifications-bg-hover: $bg-overlay;
+
+$notifications-border: $border-color-normal;
+$notifications-border-active: $accent-primary;
+$notifications-border-dnd: $accent-red;
+$notifications-border-hover: $accent-primary-dim;
+
+$notifications-icon-color: $fg-secondary;
+$notifications-icon-active: $accent-primary-bright;
+$notifications-icon-dnd: $accent-red-bright;
+
+$notifications-text-color: $fg-primary;
+$notifications-text-active: $accent-primary-bright;
+
+$notifications-shadow-hover: $glow-size-sm $glow-primary-subtle;
+
+.notifications-applet {
+  padding: $widget-padding-vertical $widget-padding-horizontal;
+  margin: 0;
+  border-radius: $applet-radius;
+  min-width: $applet-min-width;
+
+  @if $widget-bg-enabled {
+    background: $notifications-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $notifications-border;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+
+  // Has notifications
+  &.has-notifications {
+    @if $widget-bg-enabled {
+      background: $notifications-bg-active;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $notifications-border-active;
+    }
+
+    .notifications-icon {
+      color: $notifications-icon-active;
+    }
+
+    .notifications-count {
+      color: $notifications-text-active;
+    }
+  }
+
+  // Do Not Disturb mode
+  &.dnd {
+    @if $widget-bg-enabled {
+      background: $notifications-bg-dnd;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $notifications-border-dnd;
+    }
+
+    .notifications-icon {
+      color: $notifications-icon-dnd;
+    }
+  }
+
+  &:hover {
+    @if $widget-bg-enabled {
+      background: $notifications-bg-hover;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $notifications-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $notifications-shadow-hover;
+    }
+  }
+}
+
+.notifications-icon {
+  font-size: $icon-size-md;
+  color: $notifications-icon-color;
+  transition: color $transition-fast;
+}
+
+.notifications-count {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $notifications-text-color;
+  transition: color $transition-fast;
+  min-width: 12px;
+}

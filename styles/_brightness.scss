@@ -1,0 +1,68 @@
+// ============================================================================
+// BRIGHTNESS COMPONENT
+// ============================================================================
+// Brightness control with vertical scale indicator
+
+// Component variables - select from theme primitives
+$brightness-bg: $bg-elevated;
+$brightness-bg-hover: $bg-overlay;
+
+$brightness-border: $border-color-normal;
+$brightness-border-hover: $accent-primary-dim;
+
+$brightness-icon-color: $fg-secondary;
+$brightness-text-color: $fg-primary;
+
+$brightness-shadow-hover: $glow-size-sm $glow-primary-subtle;
+
+.brightness-applet {
+  padding: $widget-padding-vertical $widget-padding-horizontal;
+  margin: 0;
+  border-radius: $applet-radius;
+  min-width: $applet-min-width;
+
+  @if $widget-bg-enabled {
+    background: $brightness-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $brightness-border;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+
+  &:hover {
+    @if $widget-bg-enabled {
+      background: $brightness-bg-hover;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $brightness-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $brightness-shadow-hover;
+    }
+  }
+}
+
+.brightness-icon {
+  font-size: $icon-size-md;
+  color: $brightness-icon-color;
+  transition: color $transition-fast;
+}
+
+// Brightness scale - yellow normally, red when very low
+.brightness-applet {
+  .brightness-scale highlight {
+    background: $accent-yellow;
+  }
+
+  &.very-low .brightness-scale highlight {
+    background: $accent-red;
+  }
+}

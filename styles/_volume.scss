@@ -1,0 +1,93 @@
+// ============================================================================
+// VOLUME COMPONENT
+// ============================================================================
+// Volume control with mute state and scroll interaction
+
+// Component-specific colors
+$volume-bg: $bg-elevated;
+$volume-bg-muted: rgba($accent-red-dim, 0.15);
+$volume-bg-hover: $bg-overlay;
+
+$volume-border: $border-color-normal;
+$volume-border-muted: $accent-red;
+$volume-border-hover: $accent-primary-dim;
+
+$volume-icon-color: $fg-secondary;
+$volume-icon-muted: $accent-red-bright;
+
+$volume-text-color: $fg-primary;
+$volume-text-muted: $accent-red-bright;
+
+$volume-shadow-hover: $glow-size-sm $glow-primary-subtle;
+$volume-shadow-muted: $glow-size-sm $glow-red-subtle;
+
+.volume-applet {
+  padding: $widget-padding-vertical $widget-padding-horizontal;
+  margin: 0;
+  border-radius: $applet-radius;
+  min-width: $applet-min-width;
+
+  @if $widget-bg-enabled {
+    background: $volume-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $volume-border;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+
+  // Muted state
+  &.muted {
+    @if $widget-bg-enabled {
+      background: $volume-bg-muted;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $volume-border-muted;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $volume-shadow-muted;
+    }
+
+    .volume-icon {
+      color: $volume-icon-muted;
+    }
+
+    .volume-percent {
+      color: $volume-text-muted;
+    }
+  }
+
+  &:hover {
+    @if $widget-bg-enabled {
+      background: $volume-bg-hover;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $volume-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $volume-shadow-hover;
+    }
+  }
+}
+
+.volume-icon {
+  font-size: $icon-size-md;
+  color: $volume-icon-color;
+  transition: color $transition-fast;
+}
+
+.volume-percent {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $volume-text-color;
+  transition: color $transition-fast;
+}

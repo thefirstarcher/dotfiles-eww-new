@@ -1,0 +1,70 @@
+// ============================================================================
+// EWW MODULAR THEME SYSTEM
+// ============================================================================
+// DRY, abstraction-focused architecture following Occam's Razor
+//
+// PRINCIPLES:
+// -----------
+// 1. Single source of truth for all values (theme variables)
+// 2. Components are isolated and self-contained
+// 3. No code duplication - reuse through composition
+// 4. Minimal complexity - only what's needed
+// 5. Easy theme switching via theme-config.scss
+//
+// ARCHITECTURE:
+// ------------
+// theme-config.scss → Loads active theme variables
+// _reset.scss → Global resets
+// _layouts.scss → Bar layout containers
+// _*.scss (components) → Self-contained widgets
+// _modifiers.scss → Utility classes
+//
+// AVAILABLE COMPONENTS:
+// --------------------
+// workspace, button, card, text, icon, badge, time
+//
+// MODIFIERS:
+// ---------
+// Spacing: .m-xs .p-sm, etc.
+// Colors: .fg-primary .fg-blue, etc.
+// Effects: .glow-primary, etc.
+// Sizes: .size-sm .size-md .size-lg
+// Separators: .separator .separator-h
+
+// ============================================================================
+// IMPORTS - ORDER MATTERS!
+// ============================================================================
+
+// 1. Theme variables (single source of truth)
+@import "styles/theme-config";
+
+// 2. Global reset
+@import "styles/reset";
+
+// 3. Layout containers
+@import "styles/layouts";
+
+// 4. Components (isolated, self-contained)
+@import "styles/badge";
+@import "styles/battery";
+@import "styles/brightness";
+@import "styles/bluetooth";
+@import "styles/button";
+@import "styles/card";
+@import "styles/dashboard";
+@import "styles/icon";
+@import "styles/keyboard";
+@import "styles/microphone";
+@import "styles/network";
+@import "styles/notifications";
+@import "styles/pomodoro";
+@import "styles/scales";
+@import "styles/text";
+@import "styles/time";
+@import "styles/volume";
+@import "styles/weather";
+@import "styles/window-title";
+@import "styles/workspace";
+
+// 5. Utility modifiers (lowest specificity)
+@import "styles/modifiers";

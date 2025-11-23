@@ -1,0 +1,57 @@
+// ============================================================================
+// WINDOW TITLE COMPONENT
+// ============================================================================
+// Shows the focused window title
+
+// Component variables - select from theme primitives
+$window-title-bg: $bg-elevated;
+$window-title-bg-hover: $bg-overlay;
+
+$window-title-border: $border-color-normal;
+$window-title-border-hover: $accent-primary-dim;
+
+$window-title-text-color: $fg-primary;
+$window-title-icon-color: $fg-secondary;
+
+$window-title-shadow-hover: $glow-size-sm $glow-primary-subtle;
+
+.window-title-applet {
+  padding: $widget-padding-vertical $widget-padding-horizontal;
+  margin: 0;
+  border-radius: $applet-radius;
+
+  @if $widget-bg-enabled {
+    background: $window-title-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $window-title-border;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+
+  &:hover {
+    @if $widget-bg-enabled {
+      background: $window-title-bg-hover;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $window-title-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $window-title-shadow-hover;
+    }
+  }
+}
+
+.window-title-text {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-normal;
+  color: $window-title-text-color;
+  transition: color $transition-fast;
+}

@@ -1,0 +1,41 @@
+// ============================================================================
+// LAYOUT COMPONENTS
+// ============================================================================
+// Spacing rules:
+// - Bar: controls outer padding (vertical + horizontal)
+// - Sections: NO margin (aligned by bar padding)
+// - Widgets: margin-left/right for horizontal spacing only
+// - Widget content: padding (vertical for height, horizontal for internal spacing)
+
+// Main bar container - controls outer spacing for all content
+.bar_layout {
+  background: $bar-bg;
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $bar-border;
+  } @else {
+    border: none;
+  }
+
+  border-radius: $bar-radius;
+  padding: $bar-padding-vertical $bar-padding-horizontal;
+
+  @if $widget-shadow-enabled {
+    box-shadow: $bar-shadow;
+  } @else {
+    box-shadow: none;
+  }
+
+  transition: all $transition-normal;
+}
+
+// Section containers - left/center/right aligned groups
+// NO margin (position controlled by bar padding)
+// NO padding (spacing handled by individual widgets)
+.left_layout,
+.center_layout,
+.center_container,
+.right_layout {
+  margin: 0;
+  padding: 0;
+}

@@ -1,0 +1,108 @@
+// ============================================================================
+// WORKSPACE COMPONENT
+// ============================================================================
+// Self-contained workspace button using design tokens
+//
+// Usage in .yuck:
+//   (button :class "workspace" "1")           // Empty workspace
+//   (button :class "workspace occupied" "2")  // Has windows
+//   (button :class "workspace active" "3")    // Currently focused
+//   (button :class "workspace urgent" "4")    // Needs attention
+
+.workspace {
+  // Base styles
+  min-width: $workspace-min-size;
+  min-height: $workspace-min-size;
+  padding: $widget-padding-vertical $widget-padding-horizontal; // Height + internal spacing
+  margin: 0; // No margin - spacing handled by separator
+  border-radius: $workspace-radius;
+  font-size: $font-size-sm;
+
+  // Conditional styling based on theme mode
+  @if $widget-bg-enabled {
+    background: $workspace-bg-default;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $workspace-border-default;
+  } @else {
+    border: none;
+  }
+
+  @if $widget-shadow-enabled {
+    box-shadow: $workspace-shadow-default;
+  } @else {
+    box-shadow: none;
+  }
+
+  color: $workspace-text-default;
+  transition: all $transition-normal;
+  font-weight: $font-weight-normal;
+
+  // Occupied state - workspace has windows but not focused
+  &.occupied {
+    @if $widget-border-enabled {
+      border-color: $workspace-border-occupied;
+    }
+    color: $workspace-text-occupied;
+  }
+
+  // Active state - currently focused workspace
+  &.active {
+    @if $widget-bg-enabled {
+      background: $workspace-bg-active;
+      color: $workspace-text-active;
+    } @else {
+      background: transparent;
+      // In flat mode, use border for active state (full or bottom only)
+      @if $workspace-active-border-style == 'bottom' {
+        border-bottom: 2px solid $accent-primary-bright;
+      } @else {
+        border: 2px solid $accent-primary-bright;
+      }
+      // Use bright accent color for text in flat mode (no background)
+      color: $accent-primary-bright;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $workspace-border-active;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $workspace-shadow-active;
+    }
+
+    font-weight: $font-weight-bold;
+  }
+
+  // Urgent state - workspace needs attention
+  &.urgent {
+    @if $widget-border-enabled {
+      border-color: $workspace-border-urgent;
+    }
+    color: $workspace-text-urgent;
+
+    @if $widget-shadow-enabled {
+      box-shadow: $workspace-shadow-urgent;
+    }
+  }
+
+  // Hover effect - not applied to active workspaces
+  &:hover:not(.active) {
+    @if $widget-bg-enabled {
+      background: $workspace-bg-hover;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $workspace-border-occupied;
+    }
+
+    color: $accent-primary-bright;
+
+    @if $widget-shadow-enabled {
+      box-shadow: $workspace-shadow-hover;
+    }
+  }
+}

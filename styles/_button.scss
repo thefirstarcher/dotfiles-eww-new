@@ -1,0 +1,97 @@
+// ============================================================================
+// BUTTON COMPONENT
+// ============================================================================
+// Generic button component using design tokens
+//
+// Usage: (button :class "button" "Click me")
+//        (button :class "button btn-active" "Active")
+
+// Component variables - select from theme primitives
+$button-bg-default: $bg-elevated;
+$button-bg-active: $gradient-primary;
+$button-bg-hover: $bg-overlay;
+
+$button-text-default: $fg-primary;
+$button-text-active: $text-on-accent;
+
+$button-border-default: $border-color-normal;
+$button-border-active: $accent-primary-bright;
+$button-border-hover: $accent-primary-dim;
+
+$button-shadow-default: none;
+$button-shadow-active: $glow-size-md $glow-primary;
+$button-shadow-hover: $glow-size-sm $glow-primary-subtle;
+
+$button-radius: $radius-md;
+$button-padding-x: $space-md;
+$button-padding-y: $space-xs;
+
+.button {
+  // Base styles - all values from component variables
+  @if $widget-bg-enabled {
+    background: $button-bg-default;
+  } @else {
+    background: transparent;
+  }
+
+  color: $button-text-default;
+  padding: $button-padding-y $button-padding-x;
+  border-radius: $button-radius;
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $button-border-default;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+  min-width: 32px;
+  font-weight: $font-weight-normal;
+
+  @if $widget-shadow-enabled {
+    box-shadow: $button-shadow-default;
+  } @else {
+    box-shadow: none;
+  }
+
+  // Hover state
+  &:hover:not(.btn-active) {
+    @if $widget-bg-enabled {
+      background: $button-bg-hover;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $button-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $button-shadow-hover;
+    }
+
+    color: $accent-primary-bright;
+  }
+
+  // Active state
+  &.btn-active {
+    @if $widget-bg-enabled {
+      background: $button-bg-active;
+    }
+
+    color: $button-text-active;
+
+    @if $widget-border-enabled {
+      border-color: $button-border-active;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $button-shadow-active;
+    }
+
+    font-weight: $font-weight-bold;
+  }
+
+  // Disabled state
+  &.btn-disabled {
+    opacity: $disabled-opacity;
+  }
+}

@@ -1,0 +1,152 @@
+// ============================================================================
+// SCALE COMPONENTS (Vertical fill indicators)
+// ============================================================================
+// Common styling for vertical scales next to icons
+// Uses theme variables for unique styling per theme
+
+// Base scale styling
+scale {
+  min-width: $scale-width;
+  min-height: $scale-height;
+  margin: 0; // No margins - height controlled by padding
+
+  trough {
+    min-width: $scale-width;
+    min-height: $scale-height;
+    background: $scale-trough-bg;
+    border-radius: $scale-radius;
+    border: $scale-border;
+    box-shadow: $scale-glow;
+    // Containerize: add vertical margin to use ~75% of available height
+    margin-top: $widget-padding-vertical;
+    margin-bottom: $widget-padding-vertical;
+  }
+
+  highlight {
+    min-width: $scale-width;
+    background: $accent-primary;
+    border-radius: $scale-radius;
+  }
+
+  // Hide slider since we only want the fill bar
+  slider {
+    all: unset;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    border: none;
+    background: transparent;
+  }
+}
+
+// Network scale - green for connected
+.network-applet {
+  .network-scale highlight {
+    background: $accent-green;
+  }
+
+  &.disconnected .network-scale highlight {
+    background: $accent-red;
+  }
+}
+
+// Volume scale - changes with mute state
+.volume-applet {
+  .volume-scale highlight {
+    background: $accent-primary;
+  }
+
+  &.muted .volume-scale highlight {
+    background: $accent-red;
+  }
+
+  // Audio level scale - real-time audio output visualization
+  .audio-level-scale {
+    trough {
+      background: transparent;  // Transparent trough so volume scale shows through
+      border: none;
+      box-shadow: none;
+    }
+
+    highlight {
+      // Fully opaque bright green - maximum visibility
+      background: $accent-green-bright;
+      border-radius: $scale-radius;
+      // Very strong glow and multiple shadows for maximum contrast
+      box-shadow:
+        0 0 8px rgba($accent-green-bright, 1.0),
+        0 0 4px rgba($accent-green-bright, 0.9),
+        inset 0 0 2px rgba(255, 255, 255, 0.5);
+      // Thick bright border
+      border: 2px solid rgba($accent-green-bright, 1.0);
+    }
+  }
+
+  &.muted .audio-level-scale highlight {
+    // Fully opaque red for muted state
+    background: $accent-red-bright;
+    box-shadow:
+      0 0 8px rgba($accent-red-bright, 1.0),
+      0 0 4px rgba($accent-red-bright, 0.9),
+      inset 0 0 2px rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba($accent-red-bright, 1.0);
+  }
+}
+
+// Microphone scale - changes with mute state
+.microphone-applet {
+  .microphone-scale highlight {
+    background: $accent-primary;
+  }
+
+  &.muted .microphone-scale highlight {
+    background: $accent-red;
+  }
+
+  // Input level scale - real-time microphone input visualization
+  .input-level-scale {
+    trough {
+      background: transparent;  // Transparent trough so microphone scale shows through
+      border: none;
+      box-shadow: none;
+    }
+
+    highlight {
+      // Fully opaque bright magenta - maximum visibility
+      background: $accent-magenta-bright;
+      border-radius: $scale-radius;
+      // Very strong glow and multiple shadows for maximum contrast
+      box-shadow:
+        0 0 8px rgba($accent-magenta-bright, 1.0),
+        0 0 4px rgba($accent-magenta-bright, 0.9),
+        inset 0 0 2px rgba(255, 255, 255, 0.5);
+      // Thick bright border
+      border: 2px solid rgba($accent-magenta-bright, 1.0);
+    }
+  }
+
+  &.muted .input-level-scale highlight {
+    // Fully opaque red for muted state
+    background: $accent-red-bright;
+    box-shadow:
+      0 0 8px rgba($accent-red-bright, 1.0),
+      0 0 4px rgba($accent-red-bright, 0.9),
+      inset 0 0 2px rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba($accent-red-bright, 1.0);
+  }
+}
+
+// Battery scale - changes with charging/low state
+.battery-applet {
+  .battery-scale highlight {
+    background: $accent-primary;
+  }
+
+  &.charging .battery-scale highlight {
+    background: $accent-green;
+  }
+
+  &.low .battery-scale highlight {
+    background: $accent-red;
+  }
+}

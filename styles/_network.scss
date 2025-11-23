@@ -1,0 +1,108 @@
+// ============================================================================
+// NETWORK COMPONENT
+// ============================================================================
+// Network connection status indicator
+
+// Component variables - select from theme primitives
+$network-bg: $bg-elevated;
+$network-bg-connected: rgba($accent-green-dim, 0.2);
+$network-bg-disconnected: rgba($accent-red-dim, 0.15);
+$network-bg-hover: $bg-overlay;
+
+$network-border: $border-color-normal;
+$network-border-connected: $accent-green;
+$network-border-disconnected: $accent-red;
+$network-border-hover: $accent-primary-dim;
+
+$network-icon-color: $fg-secondary;
+$network-icon-connected: $accent-green-bright;
+$network-icon-disconnected: $accent-red-bright;
+
+$network-shadow-hover: $glow-size-sm $glow-primary-subtle;
+
+.network-applet {
+  padding: $widget-padding-vertical $widget-padding-horizontal;
+  margin: 0;
+  border-radius: $applet-radius;
+  min-width: $applet-min-width;
+
+  @if $widget-bg-enabled {
+    background: $network-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $network-border;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+
+  // WiFi connected
+  &.wifi {
+    @if $widget-bg-enabled {
+      background: $network-bg-connected;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $network-border-connected;
+    }
+
+    .network-icon {
+      color: $network-icon-connected;
+    }
+  }
+
+  // Ethernet connected
+  &.ethernet {
+    @if $widget-bg-enabled {
+      background: $network-bg-connected;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $network-border-connected;
+    }
+
+    .network-icon {
+      color: $network-icon-connected;
+    }
+  }
+
+  // Disconnected
+  &.disconnected {
+    @if $widget-bg-enabled {
+      background: $network-bg-disconnected;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $network-border-disconnected;
+    }
+
+    .network-icon {
+      color: $network-icon-disconnected;
+    }
+  }
+
+  &:hover {
+    @if $widget-bg-enabled {
+      background: $network-bg-hover;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $network-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $network-shadow-hover;
+    }
+  }
+}
+
+.network-icon {
+  font-size: $icon-size-md;
+  color: $network-icon-color;
+  transition: color $transition-fast;
+  min-width: $icon-size-md;
+}

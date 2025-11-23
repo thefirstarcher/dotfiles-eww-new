@@ -1,0 +1,53 @@
+// ============================================================================
+// KEYBOARD COMPONENT
+// ============================================================================
+// Keyboard layout indicator with flag icon
+
+// Component variables - select from theme primitives
+$keyboard-bg: $bg-elevated;
+$keyboard-bg-hover: $bg-overlay;
+
+$keyboard-border: $border-color-normal;
+$keyboard-border-hover: $accent-primary-dim;
+
+$keyboard-shadow-hover: $glow-size-sm $glow-primary-subtle;
+
+.keyboard-applet {
+  padding: $widget-padding-vertical $widget-padding-horizontal;
+  margin: 0;
+  border-radius: $applet-radius;
+  min-width: $applet-min-width;
+
+  @if $widget-bg-enabled {
+    background: $keyboard-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $keyboard-border;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+
+  &:hover {
+    @if $widget-bg-enabled {
+      background: $keyboard-bg-hover;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $keyboard-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $keyboard-shadow-hover;
+    }
+  }
+}
+
+.keyboard-flag {
+  font-size: $icon-size-md;
+  transition: all $transition-fast;
+}

@@ -1,0 +1,80 @@
+// ============================================================================
+// MODIFIER CLASSES
+// ============================================================================
+// Utility modifiers using design tokens
+
+// ============================================================================
+// SPACING MODIFIERS - HORIZONTAL ONLY
+// ============================================================================
+// Use for spacing between widgets (follows horizontal bar layout)
+// NO vertical margins (height controlled by padding)
+
+.ml-xs { margin-left: $space-xs; }
+.ml-sm { margin-left: $space-sm; }
+.ml-md { margin-left: $space-md; }
+.ml-lg { margin-left: $space-lg; }
+.ml-xl { margin-left: $space-xl; }
+
+.mr-xs { margin-right: $space-xs; }
+.mr-sm { margin-right: $space-sm; }
+.mr-md { margin-right: $space-md; }
+.mr-lg { margin-right: $space-lg; }
+.mr-xl { margin-right: $space-xl; }
+
+// Padding modifiers for widget content
+.p-vertical { padding-top: $widget-padding-vertical; padding-bottom: $widget-padding-vertical; }
+.p-horizontal { padding-left: $widget-padding-horizontal; padding-right: $widget-padding-horizontal; }
+.p-widget { padding: $widget-padding-vertical $widget-padding-horizontal; }
+
+// ============================================================================
+// COLOR MODIFIERS
+// ============================================================================
+.fg-primary { color: $accent-primary; }
+.fg-blue { color: $accent-blue; }
+.fg-green { color: $accent-green; }
+.fg-red { color: $accent-red; }
+.fg-cyan { color: $accent-cyan; }
+.fg-magenta { color: $accent-magenta; }
+
+// ============================================================================
+// EFFECT MODIFIERS
+// ============================================================================
+.glow-primary { box-shadow: $glow-size-md $glow-primary; }
+.glow-blue { box-shadow: $glow-size-md $glow-blue; }
+.glow-green { box-shadow: $glow-size-md $glow-green; }
+.glow-red { box-shadow: $glow-size-md $glow-red; }
+
+// ============================================================================
+// SIZE MODIFIERS (removed - use padding directly in components)
+// ============================================================================
+
+// ============================================================================
+// GRADIENT MODIFIERS
+// ============================================================================
+.gradient-primary { background: $gradient-primary; }
+.gradient-blue { background: $gradient-blue; }
+.gradient-green { background: $gradient-green; }
+.gradient-red { background: $gradient-red; }
+.gradient-multi { background: $gradient-multi; }
+
+// ============================================================================
+// OPACITY MODIFIERS
+// ============================================================================
+.hover-fade { opacity: $hover-opacity; }
+.disabled-fade { opacity: $disabled-opacity; }
+
+// ============================================================================
+// SEPARATORS - Vertical lines between widgets
+// ============================================================================
+.separator,
+.workspace-separator {
+  min-width: $separator-width;
+  min-height: $separator-height;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    $separator-color,
+    transparent
+  );
+  margin: 0 $widget-margin-horizontal; // Horizontal spacing only
+}

@@ -1,0 +1,343 @@
+// ============================================================================
+// DESIGN TOKENS - AYU MINI THEME
+// ============================================================================
+// Minimized version of ayu-dark theme with reduced spacing and separator-based layout
+// - No padding between bar and widgets
+// - Lower widget padding
+// - Separator-based widget division (not bubbles)
+// - Compact, space-efficient design
+
+// ============================================================================
+// COLOR PRIMITIVES (Same as ayu-dark)
+// ============================================================================
+
+// Background colors - layered depth
+$bg-primary: #0a0e14; // Deepest background
+$bg-secondary: #0d1017; // Secondary surfaces
+$bg-tertiary: #11151c; // Tertiary surfaces
+$bg-elevated: #14191f; // Elevated elements (buttons, cards)
+$bg-overlay: #1a1f26; // Overlays and modals
+
+// Foreground colors - text hierarchy
+$fg-primary: #b3b1ad; // Primary text
+$fg-secondary: #8a8a80; // Secondary text
+$fg-tertiary: #5c6166; // Tertiary/muted text
+$fg-bright: #e6e1cf; // Emphasized text
+$fg-dim: #3e4247; // Dimmed/disabled text
+
+// Special text colors
+$text-on-light: #0b0e14; // Very dark for light backgrounds
+$text-on-accent: #0d1117; // Very dark with slight warmth for accent backgrounds
+$text-on-dark: #e6e1cf; // Bright for dark backgrounds
+
+// Accent colors - Primary (Ayu orange)
+$accent-primary: #e6b450;
+$accent-primary-bright: #ffb454;
+$accent-primary-dim: #d9a842;
+
+// Accent colors - Secondary variants
+$accent-blue: #59c2ff;
+$accent-blue-bright: #73d0ff;
+$accent-blue-dim: #39bae6;
+
+$accent-green: #91b362;
+$accent-green-bright: #aad94c;
+$accent-green-dim: #7fa34d;
+
+$accent-red: #d95757;
+$accent-red-bright: #f07178;
+$accent-red-dim: #c74343;
+
+$accent-cyan: #5ccfe6;
+$accent-cyan-bright: #95e6cb;
+$accent-cyan-dim: #4cbf99;
+
+$accent-magenta: #d2a6ff;
+$accent-magenta-bright: #dfbfff;
+$accent-magenta-dim: #b77ee0;
+
+$accent-yellow: #e6b450;
+$accent-yellow-bright: #ffc44c;
+$accent-yellow-dim: #d9a53b;
+
+// ============================================================================
+// SEMANTIC COLORS
+// ============================================================================
+$color-success: $accent-green;
+$color-warning: $accent-yellow;
+$color-error: $accent-red;
+$color-info: $accent-blue;
+
+// ============================================================================
+// BORDER SYSTEM
+// ============================================================================
+$border-width-thin: 1px;
+$border-width-normal: 2px;
+$border-width-thick: 3px;
+
+$border-color-subtle: #1f242b;
+$border-color-normal: #2d333a;
+$border-color-bright: #3d434a;
+
+// Border radius - slightly reduced for mini
+$radius-none: 0px;
+$radius-sm: 4px;
+$radius-md: 6px;
+$radius-lg: 8px;
+$radius-xl: 12px;
+$radius-full: 9999px;
+
+// ============================================================================
+// SHADOW & GLOW SYSTEM
+// ============================================================================
+$shadow-color-base: rgba(0, 0, 0, 0.5);
+$shadow-color-strong: rgba(0, 0, 0, 0.7);
+
+$shadow-sm: 0 1px 2px $shadow-color-base;
+$shadow-md: 0 2px 4px $shadow-color-base;
+$shadow-lg: 0 4px 8px $shadow-color-base;
+$shadow-xl: 0 6px 12px $shadow-color-strong;
+
+// Glow sizes (reduced for mini)
+$glow-size-sm: 0 0 6px;
+$glow-size-md: 0 0 12px;
+$glow-size-lg: 0 0 18px;
+$glow-size-xl: 0 0 24px;
+
+// Glow colors with opacity
+$glow-primary: rgba(230, 180, 80, 0.5);
+$glow-primary-subtle: rgba(230, 180, 80, 0.3);
+$glow-primary-strong: rgba(230, 180, 80, 0.7);
+
+$glow-blue: rgba(89, 194, 255, 0.5);
+$glow-blue-subtle: rgba(89, 194, 255, 0.3);
+
+$glow-green: rgba(145, 179, 98, 0.5);
+$glow-green-subtle: rgba(145, 179, 98, 0.3);
+
+$glow-red: rgba(217, 87, 87, 0.6);
+$glow-red-subtle: rgba(217, 87, 87, 0.4);
+
+// ============================================================================
+// GRADIENT SYSTEM
+// ============================================================================
+$gradient-direction: 135deg;
+
+$gradient-primary: linear-gradient(
+  $gradient-direction,
+  $accent-primary-dim,
+  $accent-primary
+);
+$gradient-primary-bright: linear-gradient(
+  $gradient-direction,
+  $accent-primary,
+  $accent-primary-bright
+);
+
+$gradient-blue: linear-gradient(
+  $gradient-direction,
+  $accent-blue-dim,
+  $accent-blue-bright
+);
+$gradient-green: linear-gradient(
+  $gradient-direction,
+  $accent-green-dim,
+  $accent-green-bright
+);
+$gradient-red: linear-gradient(
+  $gradient-direction,
+  $accent-red-dim,
+  $accent-red-bright
+);
+
+$gradient-multi: linear-gradient(
+  $gradient-direction,
+  $accent-primary 0%,
+  $accent-cyan 50%,
+  $accent-magenta 100%
+);
+
+$gradient-bg-primary: linear-gradient(
+  to bottom,
+  rgba(10, 14, 20, 0.95),
+  rgba(10, 14, 20, 0.9)
+);
+$gradient-bg-overlay: linear-gradient(
+  to bottom,
+  rgba(26, 31, 38, 0.9),
+  rgba(26, 31, 38, 0.95)
+);
+
+// ============================================================================
+// SPACING SYSTEM - SIMPLIFIED
+// ============================================================================
+// Base spacing units
+$space-xs: 2px;
+$space-sm: 4px;
+$space-md: 6px;
+$space-lg: 8px;
+$space-xl: 12px;
+
+// Semantic spacing (clearer purpose)
+$bar-padding-vertical: 0px;      // Vertical padding around bar content
+$bar-padding-horizontal: 0px;    // Horizontal padding around bar content
+$widget-margin-horizontal: $space-sm;  // Space between widgets (left/right only)
+$widget-padding-vertical: $space-xs;   // Widget height control
+$widget-padding-horizontal: $space-md; // Widget internal horizontal spacing
+
+// ============================================================================
+// TYPOGRAPHY SYSTEM
+// ============================================================================
+$font-family-primary:
+  "CodeNewRoman Nerd Font", "JetBrains Mono", "FiraCode Nerd Font",
+  "Iosevka Nerd Font", monospace;
+
+$font-size-xs: 10px;
+$font-size-sm: 11px;
+$font-size-md: 13px;
+$font-size-lg: 14px;
+$font-size-xl: 16px;
+
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 700;
+
+$line-height-tight: 1.2;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.7;
+
+// ============================================================================
+// TRANSITION SYSTEM
+// ============================================================================
+$transition-timing: ease;
+$transition-timing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+$transition-fast: 150ms $transition-timing;
+$transition-normal: 250ms $transition-timing;
+$transition-slow: 350ms $transition-timing;
+$transition-smooth: 300ms $transition-timing-smooth;
+
+// ============================================================================
+// STYLE MODE CONTROLS - MINI THEME
+// ============================================================================
+// These variables control whether widgets use bubble/card style or flat/separator style
+
+$style-mode: "flat"; // 'bubble' or 'flat'
+$widget-bg-enabled: false; // Disable backgrounds on individual widgets
+$widget-border-enabled: false; // Disable borders on individual widgets
+$widget-shadow-enabled: false; // Disable shadows on widgets
+$widget-use-separators: true; // Use separators between widgets instead
+$workspace-active-border-style: "full"; // 'full' or 'bottom' - for flat mode active workspace
+
+// Uniform widget styling
+$applet-min-width: 30px;
+$applet-radius: $radius-md;  // Rounded corners for ayu theme
+
+// ============================================================================
+// LAYOUT-SPECIFIC TOKENS - MINIMIZED
+// ============================================================================
+
+// Icon component - slightly smaller
+$icon-size-sm: 12px;
+$icon-size-md: 14px;
+$icon-size-lg: 16px;
+
+// Scale components (vertical fill bars) - COMPACT
+$scale-width: 4px;
+$scale-height: 8px;
+$scale-margin-top: 4px;
+$scale-margin-bottom: 4px;
+$scale-trough-bg: rgba($fg-dim, 0.3);
+$scale-radius: $radius-sm;
+$scale-border: none;
+$scale-glow: none;
+
+// Bar layout - NO PADDING
+$bar-bg: $gradient-bg-primary;
+$bar-border: $border-color-bright;
+$bar-radius: $radius-md;
+$bar-padding-x: 0px; // No horizontal padding
+$bar-padding-y: 0px; // No vertical padding
+$bar-shadow: $shadow-md;
+
+// Section layouts - MINIMAL PADDING
+$section-padding-x: $space-sm;
+$section-padding-y: 1px;
+$section-min-height: 18px;
+
+// Time/Weather/Pomodoro widgets
+$time-radius: $radius-md;
+$time-bg: $bg-elevated;
+$time-border: $border-color-normal;
+$time-border-hover: $accent-primary-dim;
+$time-shadow-hover: $glow-size-sm $glow-primary-subtle;
+$time-text-color: $accent-primary-bright;
+$time-text-size: $font-size-xl;
+$time-text-weight: $font-weight-bold;
+$date-text-color: $accent-primary-bright;
+$date-text-size: $font-size-md;
+$date-text-weight: $font-weight-medium;
+
+$weather-bg: $bg-elevated;
+$weather-border: $border-color-normal;
+$weather-border-hover: $accent-primary-dim;
+$weather-shadow-hover: $glow-size-sm $glow-primary-subtle;
+$weather-icon-color: $fg-secondary;
+$weather-text-color: $fg-primary;
+$weather-text-size: $font-size-md;
+$weather-text-weight: $font-weight-medium;
+
+$pomodoro-bg: $bg-elevated;
+$pomodoro-border: $border-color-normal;
+$pomodoro-border-hover: $accent-primary-dim;
+$pomodoro-shadow-hover: $glow-size-sm $glow-primary-subtle;
+
+// Workspace
+$workspace-bg-default: $bg-elevated;
+$workspace-bg-active: $gradient-primary;
+$workspace-bg-hover: $bg-overlay;
+
+$workspace-text-default: $fg-secondary;
+$workspace-text-occupied: $accent-primary;
+$workspace-text-active: $text-on-accent;
+$workspace-text-urgent: $accent-red-bright;
+
+$workspace-border-default: $border-color-normal;
+$workspace-border-occupied: $accent-primary-dim;
+$workspace-border-active: $accent-primary-bright;
+$workspace-border-urgent: $accent-red-bright;
+
+$workspace-shadow-default: none;
+$workspace-shadow-active: $glow-size-md $glow-primary;
+$workspace-shadow-hover: $glow-size-sm $glow-primary-subtle;
+$workspace-shadow-urgent: $glow-size-sm $glow-red;
+
+$workspace-radius: $radius-md;
+$workspace-min-size: 22px;
+
+// Separator - MINIMAL & THIN (for flat mode)
+$separator-color: $border-color-subtle;
+$separator-width: 1px;
+$separator-height: 12px;
+$separator-margin: $space-xs;
+
+// Workspace separator - same as regular separator in mini theme
+$workspace-separator-margin: $space-xs;
+
+// ============================================================================
+// EFFECT TOKENS
+// ============================================================================
+$overlay-opacity: 0.85;
+$hover-opacity: 0.7;
+$disabled-opacity: 0.3;
+
+$blur-sm: blur(4px);
+$blur-md: blur(8px);
+$blur-lg: blur(16px);
+
+// ============================================================================
+// LEGACY ALIASES
+// ============================================================================
+$accent-orange: $accent-primary;
+$accent-orange-bright: $accent-primary-bright;
+$accent-orange-dim: $accent-primary-dim;

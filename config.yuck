@@ -1,0 +1,136 @@
+;; ============================================================================
+;; EWW CONFIGURATION - CENTRAL CONFIG FILE
+;; ============================================================================
+;; All configurable parameters in one place for easy customization
+;; Following DRY, abstraction, and Occam's Razor principles
+
+;; ============================================================================
+;; BAR CONFIGURATION
+;; ============================================================================
+;; Note: Bar window geometry must be configured directly in eww.yuck
+;; (eww doesn't support variables in geometry definitions)
+;; Edit the defwindow bar section in eww.yuck to change position/size
+
+;; Bar section spacing
+(defvar bar-section-spacing 8)
+(defvar bar-widget-spacing 4)
+
+;; ============================================================================
+;; WIDGET VISIBILITY
+;; ============================================================================
+(defvar show-workspaces true)
+(defvar show-window-title true)
+(defvar show-pomodoro true)
+(defvar show-time true)
+(defvar show-weather true)
+(defvar show-battery true)
+(defvar show-volume true)
+(defvar show-microphone true)
+(defvar show-network true)
+(defvar show-bluetooth true)
+(defvar show-notifications true)
+(defvar show-brightness true)
+(defvar show-keyboard true)
+
+;; Separators are always rendered but styled to be invisible in full themes
+;; (no variable needed - controlled by CSS)
+
+;; Time widget toggle state (true = show time, false = show date)
+(defvar time-show-time true)
+
+;; ============================================================================
+;; WORKSPACE CONFIGURATION
+;; ============================================================================
+(defvar workspace-onclick "swaymsg workspace number")
+
+;; ============================================================================
+;; TIME/DATE FORMAT CONFIGURATION
+;; ============================================================================
+;; Note: Change the format strings in the defpoll below
+;; Common formats:
+;;   Time: %H:%M (24h), %I:%M %p (12h with AM/PM)
+;;   Date: %A, %d %B (Full), %a %d (Short)
+
+;; ============================================================================
+;; DYNAMIC DATA SOURCES
+;; ============================================================================
+;; Live data polling and listening
+
+(deflisten workspaces
+  :initial "[]"
+  "~/.config/eww/scripts/workspaces.sh")
+
+(deflisten window_title
+  :initial '{"title": ""}'
+  "~/.config/eww/scripts/window-title.sh listen")
+
+(defpoll time
+  :interval "1s"
+  :initial "00:00"
+  "date '+%H:%M'")
+
+(defpoll date_full
+  :interval "10s"
+  :initial "Day, 01 Month"
+  "date '+%A, %d %B'")
+
+(defpoll battery
+  :interval "10s"
+  :initial '{"present":false,"percent":0,"status":"N/A","time":"","power":0,"icon":"","health":0,"cycles":0,"voltage":"0.0V","temp":0,"design_capacity":"N/A","current_capacity":"N/A"}'
+  "~/.config/eww/scripts/battery.sh")
+
+(deflisten volume
+  :initial '{"percent": 0, "muted": false, "level": 0}'
+  "~/.config/eww/scripts/volume-daemon.py")
+
+(deflisten microphone
+  :initial '{"percent": 0, "muted": false, "level": 0}'
+  "~/.config/eww/scripts/microphone-daemon.py")
+
+(defpoll network
+  :interval "5s"
+  :initial '{"type": "disconnected", "icon": "󰤭", "name": "", "percent": 0}'
+  "~/.config/eww/scripts/network.sh")
+
+(defpoll bluetooth
+  :interval "5s"
+  :initial '{"enabled": false, "connected": false, "device": ""}'
+  "~/.config/eww/scripts/bluetooth.sh")
+
+(defpoll notifications
+  :interval "5s"
+  :initial '{"count": 0, "dnd": false}'
+  "~/.config/eww/scripts/notifications.sh")
+
+(defpoll weather
+  :interval "1800s"
+  :initial '{"temp": "", "condition": "", "icon": ""}'
+  "~/.config/eww/scripts/weather.sh")
+
+(deflisten brightness
+  :initial '{"percent": 0}'
+  "~/.config/eww/scripts/brightness.sh listen")
+
+(deflisten keyboard
+  :initial '{"layout": "us", "icon": "🇺🇸"}'
+  "~/.config/eww/scripts/keyboard.sh listen")
+
+(deflisten pomodoro
+  :initial '{"status":"idle","time_left":1500,"time_display":"25:00","sessions":0,"is_break":false,"icon":"","percent":0,"duration":1500}'
+  "~/.config/eww/scripts/pomodoro.py listen")
+
+;; ============================================================================
+;; DASHBOARD DATA SOURCES
+;; ============================================================================
+
+(defpoll user_info
+  :interval "10s"
+  :initial '{"username":"user","uptime_days":"0 days","uptime_hours":"0 hours","uptime_minutes":"0 minutes"}'
+  "~/.config/eww/scripts/user-info.sh")
+
+(deflisten music
+  :initial '{"active_player":"","available_players":[],"art_url":"","playing":false,"position_percent":0,"title":"","artist":""}'
+  "~/.config/eww/scripts/music-daemon.py listen")
+
+;; Dashboard visibility toggle
+(defvar show-dashboard false)

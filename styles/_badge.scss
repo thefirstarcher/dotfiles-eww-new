@@ -1,0 +1,78 @@
+// ============================================================================
+// BADGE COMPONENT
+// ============================================================================
+// Small notification badge using design tokens
+//
+// Usage: (label :class "badge" "5")
+//        (label :class "badge badge-red" "!")
+
+// Component variables - select from theme primitives
+$badge-bg: $bg-overlay;
+$badge-border: $accent-primary-dim;
+$badge-text: $accent-primary;
+$badge-radius: $radius-full;
+$badge-padding-x: $space-sm;
+$badge-padding-y: $space-xs;
+$badge-font-size: $font-size-sm;
+
+.badge {
+  @if $widget-bg-enabled {
+    background: $badge-bg;
+  } @else {
+    background: transparent;
+  }
+
+  color: $badge-text;
+  padding: $badge-padding-y $badge-padding-x;
+  border-radius: $badge-radius;
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $badge-border;
+  } @else {
+    border: none;
+  }
+
+  font-size: $badge-font-size;
+  font-weight: $font-weight-bold;
+  min-width: 20px;
+
+  @if $widget-shadow-enabled {
+    box-shadow: inset 0 0 8px $glow-primary-subtle;
+  }
+}
+
+.badge-red {
+  color: $accent-red;
+
+  @if $widget-border-enabled {
+    border-color: $accent-red-dim;
+  }
+
+  @if $widget-shadow-enabled {
+    box-shadow: inset 0 0 8px $glow-red-subtle;
+  }
+}
+
+.badge-blue {
+  color: $accent-blue;
+
+  @if $widget-border-enabled {
+    border-color: $accent-blue-dim;
+  }
+
+  @if $widget-shadow-enabled {
+    box-shadow: inset 0 0 8px $glow-blue-subtle;
+  }
+}
+
+.badge-green {
+  color: $accent-green;
+
+  @if $widget-border-enabled {
+    border-color: $accent-green-dim;
+  }
+
+  @if $widget-shadow-enabled {
+    box-shadow: inset 0 0 8px $glow-green-subtle;
+  }
+}

@@ -1,0 +1,115 @@
+// ============================================================================
+// POMODORO TIMER COMPONENT
+// ============================================================================
+// Pomodoro timer with work/break sessions
+
+// Component-specific colors
+$pomodoro-bg: $bg-elevated;
+$pomodoro-border: $border-color-normal;
+$pomodoro-border-hover: $accent-primary-dim;
+$pomodoro-shadow-hover: $glow-size-sm $glow-primary-subtle;
+
+$pomodoro-icon-color: $fg-secondary;
+$pomodoro-time-color: $fg-bright;
+$pomodoro-text-size: $font-size-md;
+$pomodoro-text-weight: $font-weight-medium;
+
+// Status colors
+$pomodoro-idle-color: $fg-secondary;
+$pomodoro-running-color: #ff6b6b;  // Tomato red for focus
+$pomodoro-break-color: #51cf66;    // Green for break
+$pomodoro-paused-color: #ffd43b;   // Yellow for paused
+
+.pomodoro-applet {
+  padding: $widget-padding-vertical $space-lg; // Wider horizontal for center widget
+  margin: 0;
+  border-radius: $time-radius;  // Use time-radius for center widgets
+
+  @if $widget-bg-enabled {
+    background: $pomodoro-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $pomodoro-border;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+
+  &:hover {
+    @if $widget-border-enabled {
+      border-color: $pomodoro-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $pomodoro-shadow-hover;
+    }
+  }
+
+  &.running {
+    .pomodoro-icon,
+    .pomodoro-time {
+      color: $pomodoro-running-color;
+    }
+
+    @if $widget-border-enabled {
+      border-color: rgba($pomodoro-running-color, 0.3);
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: 0 0 8px rgba($pomodoro-running-color, 0.2);
+    }
+  }
+
+  &.break {
+    .pomodoro-icon,
+    .pomodoro-time {
+      color: $pomodoro-break-color;
+    }
+
+    @if $widget-border-enabled {
+      border-color: rgba($pomodoro-break-color, 0.3);
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: 0 0 8px rgba($pomodoro-break-color, 0.2);
+    }
+  }
+
+  &.paused {
+    .pomodoro-icon,
+    .pomodoro-time {
+      color: $pomodoro-paused-color;
+    }
+
+    @if $widget-border-enabled {
+      border-color: rgba($pomodoro-paused-color, 0.3);
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: 0 0 8px rgba($pomodoro-paused-color, 0.2);
+    }
+  }
+}
+
+.pomodoro-icon {
+  font-size: $pomodoro-text-size;
+  color: $pomodoro-icon-color;
+  transition: color $transition-fast;
+}
+
+.pomodoro-time {
+  font-size: $pomodoro-text-size;
+  font-weight: $pomodoro-text-weight;
+  color: $pomodoro-time-color;
+  transition: color $transition-fast;
+}
+
+.pomodoro-sessions {
+  font-size: $font-size-xs;
+  color: $fg-tertiary;
+  margin-left: $space-xs;
+}

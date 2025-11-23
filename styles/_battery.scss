@@ -1,0 +1,121 @@
+// ============================================================================
+// BATTERY COMPONENT
+// ============================================================================
+// Battery indicator with status-based styling
+
+// Component-specific colors
+$battery-bg: $bg-elevated;
+$battery-bg-charging: rgba($accent-green-dim, 0.2);
+$battery-bg-low: rgba($accent-red-dim, 0.15);
+$battery-bg-hover: $bg-overlay;
+
+$battery-border: $border-color-normal;
+$battery-border-charging: $accent-green;
+$battery-border-low: $accent-red;
+$battery-border-hover: $accent-primary-dim;
+
+$battery-icon-color: $fg-secondary;
+$battery-icon-charging: $accent-green-bright;
+$battery-icon-low: $accent-red-bright;
+
+$battery-text-color: $fg-primary;
+$battery-text-charging: $accent-green-bright;
+$battery-text-low: $accent-red-bright;
+
+$battery-shadow-charging: $glow-size-sm $glow-green-subtle;
+$battery-shadow-low: $glow-size-sm $glow-red-subtle;
+$battery-shadow-hover: $glow-size-sm $glow-primary-subtle;
+
+.battery-applet {
+  padding: $widget-padding-vertical $widget-padding-horizontal; // Unified spacing
+  margin: 0;
+  border-radius: $applet-radius;
+  min-width: $applet-min-width;
+
+  @if $widget-bg-enabled {
+    background: $battery-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $battery-border;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+
+  // Charging state
+  &.charging {
+    @if $widget-bg-enabled {
+      background: $battery-bg-charging;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $battery-border-charging;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $battery-shadow-charging;
+    }
+
+    .battery-icon {
+      color: $battery-icon-charging;
+    }
+
+    .battery-percent {
+      color: $battery-text-charging;
+    }
+  }
+
+  // Low battery warning
+  &.low {
+    @if $widget-bg-enabled {
+      background: $battery-bg-low;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $battery-border-low;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $battery-shadow-low;
+    }
+
+    .battery-icon {
+      color: $battery-icon-low;
+    }
+
+    .battery-percent {
+      color: $battery-text-low;
+    }
+  }
+
+  &:hover {
+    @if $widget-bg-enabled {
+      background: $battery-bg-hover;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $battery-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $battery-shadow-hover;
+    }
+  }
+}
+
+.battery-icon {
+  font-size: $icon-size-md;
+  color: $battery-icon-color;
+  transition: color $transition-fast;
+}
+
+.battery-percent {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $battery-text-color;
+  transition: color $transition-fast;
+}

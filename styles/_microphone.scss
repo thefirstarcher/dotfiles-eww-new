@@ -1,0 +1,93 @@
+// ============================================================================
+// MICROPHONE COMPONENT
+// ============================================================================
+// Microphone control with mute state and scroll interaction
+
+// Component variables - select from theme primitives
+$microphone-bg: $bg-elevated;
+$microphone-bg-muted: rgba($accent-red-dim, 0.15);
+$microphone-bg-hover: $bg-overlay;
+
+$microphone-border: $border-color-normal;
+$microphone-border-muted: $accent-red;
+$microphone-border-hover: $accent-primary-dim;
+
+$microphone-icon-color: $fg-secondary;
+$microphone-icon-muted: $accent-red-bright;
+
+$microphone-text-color: $fg-primary;
+$microphone-text-muted: $accent-red-bright;
+
+$microphone-shadow-hover: $glow-size-sm $glow-primary-subtle;
+$microphone-shadow-muted: $glow-size-sm $glow-red-subtle;
+
+.microphone-applet {
+  padding: $widget-padding-vertical $widget-padding-horizontal;
+  margin: 0;
+  border-radius: $applet-radius;
+  min-width: $applet-min-width;
+
+  @if $widget-bg-enabled {
+    background: $microphone-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $microphone-border;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+
+  // Muted state
+  &.muted {
+    @if $widget-bg-enabled {
+      background: $microphone-bg-muted;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $microphone-border-muted;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $microphone-shadow-muted;
+    }
+
+    .microphone-icon {
+      color: $microphone-icon-muted;
+    }
+
+    .microphone-percent {
+      color: $microphone-text-muted;
+    }
+  }
+
+  &:hover {
+    @if $widget-bg-enabled {
+      background: $microphone-bg-hover;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $microphone-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $microphone-shadow-hover;
+    }
+  }
+}
+
+.microphone-icon {
+  font-size: $icon-size-md;
+  color: $microphone-icon-color;
+  transition: color $transition-fast;
+}
+
+.microphone-percent {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $microphone-text-color;
+  transition: color $transition-fast;
+}

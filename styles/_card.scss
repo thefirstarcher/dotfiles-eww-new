@@ -1,0 +1,50 @@
+// ============================================================================
+// CARD COMPONENT
+// ============================================================================
+// Container card using design tokens
+//
+// Usage: (box :class "card" ...)
+
+// Component variables - select from theme primitives
+$card-bg: $bg-elevated;
+$card-border: $border-color-normal;
+$card-border-hover: $accent-primary-dim;
+$card-radius: $radius-lg;
+$card-padding: $space-md;
+$card-shadow: $shadow-md;
+$card-shadow-hover: $shadow-lg;
+
+.card {
+  @if $widget-bg-enabled {
+    background: $card-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $card-border;
+  } @else {
+    border: none;
+  }
+
+  border-radius: $card-radius;
+  padding: $card-padding;
+
+  @if $widget-shadow-enabled {
+    box-shadow: $card-shadow;
+  } @else {
+    box-shadow: none;
+  }
+
+  transition: all $transition-normal;
+
+  &:hover {
+    @if $widget-border-enabled {
+      border-color: $card-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $card-shadow-hover;
+    }
+  }
+}

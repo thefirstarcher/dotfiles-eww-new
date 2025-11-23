@@ -1,0 +1,28 @@
+// ============================================================================
+// RESET & BASE STYLES
+// ============================================================================
+// Global reset using design tokens
+
+* {
+  all: unset;
+  font-family: $font-family-primary;
+  font-size: $font-size-md;
+  // Note: color is set per-component to avoid specificity issues
+}
+
+// ============================================================================
+// TOOLTIP STYLING
+// ============================================================================
+tooltip {
+  background-color: $bg-overlay;
+  color: $fg-bright;
+  border: $border-width-normal solid $accent-primary-dim;
+  border-radius: $radius-none;
+  padding: $space-sm $space-md;
+  font-size: $font-size-sm;
+  box-shadow: $shadow-lg, $glow-size-sm $glow-primary-subtle;
+}
+
+tooltip label {
+  color: $fg-bright;
+}

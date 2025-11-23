@@ -1,0 +1,56 @@
+// ============================================================================
+// WEATHER COMPONENT
+// ============================================================================
+// Weather display with temperature and condition
+
+// Component-specific colors
+$weather-bg: $bg-elevated;
+$weather-border: $border-color-normal;
+$weather-border-hover: $accent-primary-dim;
+$weather-shadow-hover: $glow-size-sm $glow-primary-subtle;
+
+$weather-icon-color: $fg-secondary;
+$weather-text-color: $fg-primary;
+$weather-text-size: $font-size-md;
+$weather-text-weight: $font-weight-medium;
+
+.weather-applet {
+  padding: $widget-padding-vertical $space-lg; // Wider horizontal for center widget
+  margin: 0;
+  border-radius: $time-radius;  // Use time-radius for center widgets
+
+  @if $widget-bg-enabled {
+    background: $weather-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $weather-border;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+
+  &:hover {
+    @if $widget-border-enabled {
+      border-color: $weather-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $weather-shadow-hover;
+    }
+  }
+}
+
+.weather-icon {
+  font-size: $weather-text-size;
+  color: $weather-icon-color;
+}
+
+.weather-temp {
+  font-size: $weather-text-size;
+  font-weight: $weather-text-weight;
+  color: $weather-text-color;
+}

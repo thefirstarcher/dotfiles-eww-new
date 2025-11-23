@@ -1,0 +1,280 @@
+// ============================================================================
+// DASHBOARD COMPONENT
+// ============================================================================
+// Floating dashboard window with user info and music player
+
+// Dashboard container
+.dashboard-container {
+  background: $gradient-bg-overlay;
+
+  @if $widget-border-enabled {
+    border: $border-width-normal solid $border-color-bright;
+  }
+
+  border-radius: $radius-lg;
+  padding: $space-lg;
+
+  @if $widget-shadow-enabled {
+    box-shadow: $shadow-xl;
+  }
+}
+
+// Dashboard toggle button (in bar)
+.dashboard-toggle {
+  padding: $widget-padding-vertical $widget-padding-horizontal;
+  margin: 0;
+  border-radius: $applet-radius;
+  min-width: $workspace-min-size;
+  min-height: $workspace-min-size;
+
+  @if $widget-bg-enabled {
+    background: $bg-elevated;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $border-color-normal;
+  }
+
+  color: $fg-secondary;
+  font-size: $icon-size-md;
+  transition: all $transition-normal;
+
+  &:hover {
+    @if $widget-bg-enabled {
+      background: $bg-overlay;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $accent-primary-dim;
+    }
+
+    color: $accent-primary-bright;
+
+    @if $widget-shadow-enabled {
+      box-shadow: $glow-size-sm $glow-primary-subtle;
+    }
+  }
+
+  &.active {
+    @if $widget-bg-enabled {
+      background: $gradient-primary;
+    } @else {
+      border-bottom: 2px solid $accent-primary-bright;
+    }
+
+    color: $text-on-accent;
+
+    @if $widget-shadow-enabled {
+      box-shadow: $glow-size-md $glow-primary;
+    }
+  }
+}
+
+// ============================================================================
+// USER INFO WIDGET
+// ============================================================================
+
+.user-info-applet {
+  padding: $space-md;
+  background: $bg-elevated;
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $border-color-normal;
+  }
+
+  border-radius: $radius-md;
+  margin-bottom: $space-md;
+
+  @if $widget-shadow-enabled {
+    box-shadow: $shadow-md;
+  }
+
+  .username {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $accent-primary-bright;
+    margin-bottom: $space-sm;
+  }
+
+  .uptime-days,
+  .uptime-hours,
+  .uptime-minutes {
+    font-size: $font-size-md;
+    color: $fg-secondary;
+    margin: $space-xs 0;
+  }
+}
+
+// ============================================================================
+// MUSIC PLAYER WIDGET
+// ============================================================================
+
+.music-player-applet {
+  padding: $space-md;
+  background: $bg-elevated;
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $border-color-normal;
+  }
+
+  border-radius: $radius-md;
+
+  @if $widget-shadow-enabled {
+    box-shadow: $shadow-md;
+  }
+}
+
+// Main player container
+.player-main-container {
+}
+
+// Player left section
+.player-left-section {
+}
+
+// Player right section
+.player-right-section {
+  min-width: 150px;
+}
+
+// Album art section with app switcher buttons
+.album-section {
+  margin: $space-sm 0;
+}
+
+// App switcher buttons - thin gradient bars
+.app-switcher-left,
+.app-switcher-right {
+  min-width: 12px;
+  min-height: 150px;
+  margin: 0;
+  padding: 0;
+  border-radius: $radius-sm;
+  border: none;
+  transition: all $transition-fast;
+
+  &:hover {
+    @if $widget-shadow-enabled {
+      box-shadow: $glow-size-sm $glow-primary-subtle;
+    }
+  }
+}
+
+.app-switcher-left {
+  // Gradient from left (black) to right (colored towards image)
+  background: linear-gradient(
+    to left,
+    rgba(0, 0, 0, 0.8),
+    $accent-primary-bright
+  );
+  margin-right: $space-xs;
+}
+
+.app-switcher-right {
+  // Gradient from left (colored towards image) to right (black)
+  background: linear-gradient(
+    to left,
+    $accent-primary-bright,
+    rgba(0, 0, 0, 0.8)
+  );
+  margin-left: $space-xs;
+}
+
+// Album art container
+.album-art-container {
+}
+
+.album-art {
+  border-radius: $radius-md;
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $border-color-bright;
+  }
+
+  @if $widget-shadow-enabled {
+    box-shadow: $shadow-lg;
+  }
+}
+
+// Album art placeholder
+.album-art-placeholder {
+  min-width: 70px;
+  min-height: 70px;
+  background-size: cover;
+  background-position: center;
+  background: $bg-tertiary;
+  border-radius: $radius-md;
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $border-color-normal;
+  }
+
+  .placeholder-icon {
+    font-size: 56px;
+    color: $fg-tertiary;
+  }
+}
+
+// Player name label
+.player-name {
+  font-size: $font-size-sm;
+  color: $fg-tertiary;
+  margin: $space-sm 0;
+}
+
+// Seek bar
+.seek-bar {
+  margin: $space-md 0;
+
+  trough {
+    min-height: 6px;
+    background: $bg-tertiary;
+    border-radius: $radius-full;
+
+    @if $widget-border-enabled {
+      border: $border-width-thin solid $border-color-subtle;
+    }
+  }
+
+  highlight {
+    background: $gradient-primary;
+    border-radius: $radius-full;
+  }
+
+  slider {
+    all: unset;
+    min-width: 0;
+    min-height: 0;
+    background: transparent;
+    border: none;
+  }
+}
+
+// Player controls (prev/play/next buttons)
+.player-controls {
+  margin: $space-md 0;
+}
+
+.control-button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: $space-sm;
+  font-size: $font-size-lg;
+  background: $bg-elevated;
+  border: $border-width-thin solid $border-color-normal;
+  border-radius: $radius-sm;
+  color: $fg-primary;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: $bg-overlay;
+    border-color: $accent-primary-dim;
+    color: $accent-primary-bright;
+
+    @if $widget-shadow-enabled {
+      box-shadow: $glow-size-md $glow-primary;
+    }
+  }
+}

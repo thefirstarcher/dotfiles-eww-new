@@ -1,0 +1,110 @@
+// ============================================================================
+// BLUETOOTH COMPONENT
+// ============================================================================
+// Bluetooth status indicator
+
+// Component variables - select from theme primitives
+$bluetooth-bg: $bg-elevated;
+$bluetooth-bg-enabled: rgba($accent-blue-dim, 0.2);
+$bluetooth-bg-connected: rgba($accent-green-dim, 0.2);
+$bluetooth-bg-disabled: rgba($fg-dim, 0.1);
+$bluetooth-bg-hover: $bg-overlay;
+
+$bluetooth-border: $border-color-normal;
+$bluetooth-border-enabled: $accent-blue;
+$bluetooth-border-connected: $accent-green;
+$bluetooth-border-disabled: $fg-dim;
+$bluetooth-border-hover: $accent-primary-dim;
+
+$bluetooth-icon-color: $fg-secondary;
+$bluetooth-icon-enabled: $accent-blue-bright;
+$bluetooth-icon-connected: $accent-green-bright;
+$bluetooth-icon-disabled: $fg-dim;
+
+$bluetooth-shadow-hover: $glow-size-sm $glow-primary-subtle;
+
+.bluetooth-applet {
+  padding: $widget-padding-vertical $widget-padding-horizontal;
+  margin: 0;
+  border-radius: $applet-radius;
+  min-width: $applet-min-width;
+
+  @if $widget-bg-enabled {
+    background: $bluetooth-bg;
+  } @else {
+    background: transparent;
+  }
+
+  @if $widget-border-enabled {
+    border: $border-width-thin solid $bluetooth-border;
+  } @else {
+    border: none;
+  }
+
+  transition: all $transition-normal;
+
+  // Enabled but not connected
+  &.enabled {
+    @if $widget-bg-enabled {
+      background: $bluetooth-bg-enabled;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $bluetooth-border-enabled;
+    }
+
+    .bluetooth-icon {
+      color: $bluetooth-icon-enabled;
+    }
+  }
+
+  // Connected to device
+  &.connected {
+    @if $widget-bg-enabled {
+      background: $bluetooth-bg-connected;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $bluetooth-border-connected;
+    }
+
+    .bluetooth-icon {
+      color: $bluetooth-icon-connected;
+    }
+  }
+
+  // Disabled
+  &.disabled {
+    @if $widget-bg-enabled {
+      background: $bluetooth-bg-disabled;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $bluetooth-border-disabled;
+    }
+
+    .bluetooth-icon {
+      color: $bluetooth-icon-disabled;
+    }
+  }
+
+  &:hover {
+    @if $widget-bg-enabled {
+      background: $bluetooth-bg-hover;
+    }
+
+    @if $widget-border-enabled {
+      border-color: $bluetooth-border-hover;
+    }
+
+    @if $widget-shadow-enabled {
+      box-shadow: $bluetooth-shadow-hover;
+    }
+  }
+}
+
+.bluetooth-icon {
+  font-size: $icon-size-md;
+  color: $bluetooth-icon-color;
+  transition: color $transition-fast;
+}
