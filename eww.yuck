@@ -47,7 +47,6 @@
     :orientation "h"
     (section :halign "start" :class "left_layout"
       (dashboard-toggle-button)
-      ;; FIX: Separator ensures consistent spacing between button and workspaces
       (mini-separator)
       (conditional-widget :condition show-workspaces
         (workspaces))
@@ -119,10 +118,8 @@
 ;; COMPONENTS
 ;; ============================================================================
 
-;; Dashboard toggle button (in bar)
 (defwidget dashboard-toggle-button []
   (eventbox
-    ;; Use script to check window state (fixes double-click issue)
     :onclick "~/.config/eww/scripts/toggle-dashboard.sh"
     :cursor "pointer"
     :tooltip "Toggle Dashboard"
@@ -400,37 +397,66 @@
           :space-evenly false
           :halign "center"
           :valign "center"
-          (button :class "app-switcher-left" :onclick "~/.config/eww/scripts/music-control.sh prev_player" :visible "${arraylength(music.available_players) > 1}" "")
+          (button
+             :class "app-switcher-left"
+             ;; Command calls the new rust binary directly
+             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon switch '${music.available_players[0]}'"
+             :visible "${arraylength(music.available_players) > 1}"
+             "")
 
-          ;; Album Art (Background Image for cropping)
+          ;; Album Art
           (box :class "album-art" :visible "${music.art_url != ''}" :style "background-image: url('${music.art_url}');")
           (box :class "album-art-placeholder" :visible "${music.art_url == ''}" (label :text "" :class "placeholder-icon"))
 
-          (button :class "app-switcher-right" :onclick "~/.config/eww/scripts/music-control.sh next_player" :visible "${arraylength(music.available_players) > 1}" "")
+          (button
+             :class "app-switcher-right"
+             ;; This logic needs a smarter next/prev index calculation, but for now just a placeholder logic
+             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon switch '${music.available_players[0]}'"
+             :visible "${arraylength(music.available_players) > 1}"
+             "")
         )
         (label :class "player-name" :text "${music.active_player}" :limit-width 15 :halign "center")
+
+        ;; Player Volume (Below name)
+        (eventbox
+          :onscroll "if [ '{}' = 'up' ]; then ~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon volume up; else ~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon volume down; fi"
+          (scale
+            :class "player-volume-bar"
+            :value "${music.volume * 100}"
+            :min 0
+            :max 100
+            :onchange "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon volume {}"
+            :tooltip "Volume: ${round(music.volume * 100, 0)}%"
+          )
+        )
       )
+
       ;; Right: Controls & Seek
       (box
         :class "player-right-section"
         :orientation "v"
         :space-evenly false
         :valign "center"
-        ;; Seek Bar (FIX: Use fallback to 0 to prevent 50% reset issue)
+
+        (label :class "track-title" :text "${music.title}" :limit-width 20 :halign "center")
+        (label :class "track-artist" :text "${music.artist}" :limit-width 20 :halign "center" :visible "${music.artist != ''}")
+
+        ;; Seek Bar
         (scale
           :class "seek-bar"
-          :value "${music.position_percent ?: 0}"
-          :onchange "~/.config/eww/scripts/music-control.sh seek {}"
+          :value "${music.position_percent}"
+          :onchange "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon seek {}"
           :min 0
-          :max 100)
+          :max 100
+          :active "${music.can_seek}")
 
-        ;; Time Display (Below seek bar)
+        ;; Time Display
         (box
           :class "player-time-labels"
           :orientation "h"
           :space-evenly true
-          (label :class "time-current" :text "${music.position_time ?: '0:00'}" :halign "start")
-          (label :class "time-total" :text "${music.duration_time ?: '0:00'}" :halign "end")
+          (label :class "time-current" :text "${music.position_time}" :halign "start")
+          (label :class "time-total" :text "${music.duration_time}" :halign "end")
         )
 
         ;; Controls
@@ -440,9 +466,38 @@
           :space-evenly false
           :spacing 20
           :halign "center"
-          (button :class "control-button" :onclick "~/.config/eww/scripts/music-control.sh previous" "󰒮")
-          (button :class "control-button main" :onclick "~/.config/eww/scripts/music-control.sh playpause" "${music.playing ? '󰏤' : '󰐊'}")
-          (button :class "control-button" :onclick "~/.config/eww/scripts/music-control.sh next" "󰒭")
+
+          ;; Shuffle
+          (button
+             :class "control-button small ${music.shuffle ? 'active' : ''}"
+             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon shuffle"
+             :visible "${music.active_player != ''}"
+             "")
+
+          (button
+             :class "control-button"
+             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon previous"
+             :visible "${music.can_go_previous}"
+             "󰒮")
+
+          (button
+             :class "control-button main"
+             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon play-pause"
+             :visible "${music.can_play || music.can_pause}"
+             "${music.playing ? '󰏤' : '󰐊'}")
+
+          (button
+             :class "control-button"
+             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon next"
+             :visible "${music.can_go_next}"
+             "󰒭")
+
+          ;; Loop
+          (button
+             :class "control-button small ${music.loop_status != 'None' ? 'active' : ''}"
+             :onclick "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon loop"
+             :visible "${music.active_player != ''}"
+             "${music.loop_status == 'Track' ? '󰑘' : '󰑖'}")
         )
       )
     )

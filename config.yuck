@@ -130,7 +130,7 @@
 
 (deflisten music
   :initial '{"active_player":"","available_players":[],"art_url":"","playing":false,"position_percent":0,"title":"","artist":""}'
-  "~/.config/eww/scripts/music-daemon.py listen")
+  "~/.config/eww/rust-applets/eww-music-daemon/target/release/eww-music-daemon listen")
 
 ;; Dashboard visibility toggle
 (defvar show-dashboard false)
