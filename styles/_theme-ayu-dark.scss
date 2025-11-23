@@ -93,6 +93,13 @@ $widget-margin-horizontal: 4px; // REQUIRED by _dashboard.scss and others
 $widget-padding-vertical: 4px;
 $widget-padding-horizontal: 12px;
 
+$hover-opacity: 0.8;
+$disabled-opacity: 0.3;
+$overlay-opacity: 0.85;
+$blur-sm: blur(4px);
+$blur-md: blur(8px);
+$blur-lg: blur(16px);
+
 // ============================================================================
 // 3. BORDERS & EFFECTS
 // ============================================================================
@@ -279,6 +286,10 @@ $font-size-sm: 11px;
 $font-size-md: 13px;
 $font-size-lg: 14px;
 $font-size-xl: 16px;
+
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 700;
 
 $transition-timing: ease;
 $transition-fast: 150ms $transition-timing;

@@ -2,11 +2,6 @@
 // DESIGN TOKENS - CYBER MINI THEME
 // ============================================================================
 // Minimized version of cyber-blue-sharp theme with reduced spacing and separator-based layout
-// - No padding between bar and widgets
-// - Lower widget padding
-// - Separator-based widget division (not bubbles)
-// - Compact, space-efficient design
-// - Sharp edges and neon aesthetic
 
 // ============================================================================
 // COLOR PRIMITIVES (Same as cyber-blue-sharp)
@@ -172,12 +167,6 @@ $gradient-bg-overlay: linear-gradient(
 // ============================================================================
 // SPACING SYSTEM - SIMPLIFIED
 // ============================================================================
-// Rules:
-// 1. Bar padding: outer space around all content (vertical + horizontal)
-// 2. Widget margin-left/right: horizontal spacing between widgets only
-// 3. Widget padding: controls widget height and internal spacing
-// 4. NO vertical margins (height = padding only)
-
 // Base spacing units
 $space-xs: 2px;
 $space-sm: 4px;
@@ -186,10 +175,10 @@ $space-lg: 8px;
 $space-xl: 12px;
 
 // Semantic spacing (clearer purpose)
-$bar-padding-vertical: 0px;      // Vertical padding around bar content
-$bar-padding-horizontal: 0px;    // Horizontal padding around bar content
-$widget-margin-horizontal: $space-sm;  // Space between widgets (left/right only)
-$widget-padding-vertical: $space-xs;   // Widget height control
+$bar-padding-vertical: 0px; // Vertical padding around bar content
+$bar-padding-horizontal: 0px; // Horizontal padding around bar content
+$widget-margin-horizontal: $space-sm; // Space between widgets (left/right only)
+$widget-padding-vertical: $space-xs; // Widget height control
 $widget-padding-horizontal: $space-md; // Widget internal horizontal spacing
 
 // ============================================================================
@@ -238,11 +227,15 @@ $workspace-active-border-style: "bottom"; // 'full' or 'bottom' - for flat mode 
 
 // Uniform widget styling
 $applet-min-width: 30px;
-$applet-radius: $radius-none;  // Sharp corners for cyber theme
+$applet-radius: $radius-none; // Sharp corners for cyber theme
 
 // ============================================================================
 // COMPONENT-SPECIFIC TOKENS - MINIMIZED
 // ============================================================================
+
+// Dashboard (ADDED: Missing variables)
+$dashboard-border-color: $accent-primary;
+$dashboard-shadow: 0 0 20px rgba(0, 217, 255, 0.15);
 
 // Workspace - cyber blue theme, compact
 $workspace-bg-default: $bg-elevated;

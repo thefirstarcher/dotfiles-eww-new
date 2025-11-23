@@ -89,6 +89,14 @@ $glow-primary: rgba(0, 217, 255, 0.7);
 $glow-primary-subtle: rgba(0, 217, 255, 0.4);
 $glow-primary-strong: rgba(0, 217, 255, 1);
 
+// Secondary Glows (Missing in original)
+$glow-blue: rgba(0, 102, 255, 0.7);
+$glow-blue-subtle: rgba(0, 102, 255, 0.4);
+$glow-green: rgba(0, 255, 136, 0.7);
+$glow-green-subtle: rgba(0, 255, 136, 0.4);
+$glow-red: rgba(255, 0, 85, 0.8);
+$glow-red-subtle: rgba(255, 0, 85, 0.5);
+
 // GRADIENTS - HORIZONTAL TECH
 $gradient-direction: 90deg;
 $gradient-primary: linear-gradient(
@@ -182,7 +190,15 @@ $widget-shadow-enabled: true;
 $widget-use-separators: false;
 $workspace-active-border-style: "bottom";
 
+$hover-opacity: 0.8;
+$disabled-opacity: 0.3;
+$overlay-opacity: 0.85;
+$blur-sm: blur(4px);
+$blur-md: blur(8px);
+$blur-lg: blur(16px);
+
 // COMPONENT SCALES
+$applet-min-width: 30px; // Added
 $icon-size-sm: 14px;
 $icon-size-md: 16px;
 $icon-size-lg: 20px;
@@ -192,6 +208,9 @@ $scale-trough-bg: rgba($accent-primary-dim, 0.2);
 $scale-radius: 0px;
 $scale-border: 2px solid $accent-primary-dim;
 $scale-glow: $glow-size-sm $glow-primary-subtle;
+
+// OPACITY
+$disabled-opacity: 0.3; // Added
 
 // BAR CONFIG
 $bar-bg: rgba(11, 14, 20, 0.98);
@@ -205,12 +224,42 @@ $section-padding-x: 6px;
 $section-padding-y: 6px;
 $section-min-height: 30px;
 
-// COMPONENT OVERRIDES
+// TIME WIDGET
+$time-bg: $bg-elevated;
+$time-border: $border-color-normal;
+$time-border-hover: $accent-primary-dim;
+$time-shadow-hover: $glow-size-sm $glow-primary-subtle;
+$time-text-color: $accent-primary-bright;
+$time-text-size: 16px;
+$time-text-weight: 700;
+$date-text-color: $accent-primary-bright;
+$date-text-size: 13px;
+$date-text-weight: 500;
+
+// WORKSPACE
 $workspace-bg-default: $bg-elevated;
 $workspace-bg-active: $gradient-primary;
+$workspace-bg-hover: $bg-overlay;
+
+$workspace-text-default: $fg-secondary;
+$workspace-text-occupied: $accent-primary;
+$workspace-text-active: $text-on-accent;
+$workspace-text-urgent: $accent-red-bright;
+
+$workspace-border-default: $border-color-normal;
+$workspace-border-occupied: $accent-primary-dim;
+$workspace-border-active: $accent-primary-bright;
+$workspace-border-urgent: $accent-red-bright;
+
+$workspace-shadow-default: none;
+$workspace-shadow-active: $glow-size-md $glow-primary;
+$workspace-shadow-hover: $glow-size-sm $glow-primary-subtle;
+$workspace-shadow-urgent: $glow-size-sm $glow-red;
+
 $workspace-radius: 0px;
 $workspace-min-size: 28px;
 
+// SEPARATORS
 $separator-color: transparent;
 $separator-width: 0px;
 $separator-height: 0px;
