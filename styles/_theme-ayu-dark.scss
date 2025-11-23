@@ -1,57 +1,103 @@
 // ============================================================================
 // DESIGN TOKENS - AYU DARK THEME
 // ============================================================================
-// Style: Warm, soft, rounded, relaxed spacing
+// Style: Warm, soft, rounded, bubble-style layout
 
-// COLOR PRIMITIVES
+// ============================================================================
+// 1. COLOR PRIMITIVES
+// ============================================================================
+
+// Background colors
 $bg-primary: #0a0e14;
 $bg-secondary: #0d1017;
 $bg-tertiary: #11151c;
 $bg-elevated: #14191f;
 $bg-overlay: #1a1f26;
 
+// Foreground colors
 $fg-primary: #b3b1ad;
 $fg-secondary: #8a8a80;
 $fg-tertiary: #5c6166;
 $fg-bright: #e6e1cf;
 $fg-dim: #3e4247;
 
+// Text variants
 $text-on-light: #0b0e14;
 $text-on-accent: #0d1117;
 $text-on-dark: #e6e1cf;
 
-// Primary Accent (Ayu Orange)
-$accent-primary: #e6b450;
+// Accents
+$accent-primary: #e6b450; // Ayu Orange
 $accent-primary-bright: #ffb454;
 $accent-primary-dim: #d9a842;
 
-// Secondary Accents
 $accent-blue: #59c2ff;
 $accent-blue-bright: #73d0ff;
 $accent-blue-dim: #39bae6;
+
 $accent-green: #91b362;
 $accent-green-bright: #aad94c;
 $accent-green-dim: #7fa34d;
+
 $accent-red: #d95757;
 $accent-red-bright: #f07178;
 $accent-red-dim: #c74343;
+
 $accent-cyan: #5ccfe6;
 $accent-cyan-bright: #95e6cb;
 $accent-cyan-dim: #4cbf99;
+
 $accent-magenta: #d2a6ff;
 $accent-magenta-bright: #dfbfff;
 $accent-magenta-dim: #b77ee0;
+
 $accent-yellow: #e6b450;
 $accent-yellow-bright: #ffc44c;
 $accent-yellow-dim: #d9a53b;
 
-// SEMANTIC
+// Semantic
 $color-success: $accent-green;
 $color-warning: $accent-yellow;
 $color-error: $accent-red;
 $color-info: $accent-blue;
 
-// BORDER SYSTEM - SOFT
+// ============================================================================
+// 2. GLOBAL SIZING & SPACING
+// ============================================================================
+
+// Spacing units
+$space-xs: 4px;
+$space-sm: 8px;
+$space-md: 12px;
+$space-lg: 16px;
+$space-xl: 24px;
+
+// Global Radii
+$radius-none: 0px;
+$radius-sm: 6px;
+$radius-md: 12px;
+$radius-lg: 16px;
+$radius-xl: 20px;
+$radius-full: 99px;
+
+// Component Radii
+$applet-radius: 12px;
+$time-radius: 12px;
+$workspace-radius: 12px;
+$button-radius: 12px;
+$card-radius: 12px;
+
+// Widget Defaults
+$applet-min-width: 30px; // REQUIRED by _battery.scss
+$widget-margin-horizontal: 4px; // REQUIRED by _dashboard.scss and others
+$widget-padding-vertical: 4px;
+$widget-padding-horizontal: 12px;
+
+// ============================================================================
+// 3. BORDERS & EFFECTS
+// ============================================================================
+
+// Borders
 $border-width-thin: 1px;
 $border-width-normal: 1px;
 $border-width-thick: 2px;
@@ -60,19 +106,7 @@ $border-color-subtle: #1f242b;
 $border-color-normal: #2d333a;
 $border-color-bright: #3d434a;
 
-// Radius - Very Rounded
-$radius-none: 0px;
-$radius-sm: 6px;
-$radius-md: 12px;
-$radius-lg: 16px;
-$radius-xl: 20px;
-$radius-full: 99px;
-
-$applet-radius: 12px;
-$time-radius: 12px;
-$workspace-radius: 12px;
-
-// SHADOWS
+// Shadows
 $shadow-color-base: rgba(0, 0, 0, 0.5);
 $shadow-color-strong: rgba(0, 0, 0, 0.7);
 $shadow-sm: 0 2px 4px $shadow-color-base;
@@ -80,6 +114,7 @@ $shadow-md: 0 4px 8px $shadow-color-base;
 $shadow-lg: 0 8px 16px $shadow-color-base;
 $shadow-xl: 0 12px 24px $shadow-color-strong;
 
+// Glows
 $glow-size-sm: 0 0 8px;
 $glow-size-md: 0 0 16px;
 $glow-size-lg: 0 0 24px;
@@ -91,12 +126,22 @@ $glow-primary-strong: rgba(230, 180, 80, 0.7);
 
 $glow-blue: rgba(89, 194, 255, 0.5);
 $glow-blue-subtle: rgba(89, 194, 255, 0.3);
+
 $glow-green: rgba(145, 179, 98, 0.5);
 $glow-green-subtle: rgba(145, 179, 98, 0.3);
+
 $glow-red: rgba(217, 87, 87, 0.6);
 $glow-red-subtle: rgba(217, 87, 87, 0.4);
 
-// GRADIENTS
+// Opacity & Blur
+$overlay-opacity: 0.85;
+$hover-opacity: 0.7;
+$disabled-opacity: 0.3; // REQUIRED by _button.scss
+$blur-sm: blur(4px);
+$blur-md: blur(8px);
+$blur-lg: blur(16px);
+
+// Gradients
 $gradient-direction: 135deg;
 $gradient-primary: linear-gradient(
   $gradient-direction,
@@ -141,58 +186,71 @@ $gradient-bg-overlay: linear-gradient(
   rgba(26, 31, 38, 0.98)
 );
 
-// SPACING - RELAXED
-$space-xs: 4px;
-$space-sm: 8px;
-$space-md: 12px;
-$space-lg: 16px;
-$space-xl: 24px;
+// ============================================================================
+// 4. COMPONENT VARIABLES
+// ============================================================================
 
+// Bar Layout (REQUIRED by _layouts.scss)
+$bar-bg: $gradient-bg-primary;
+$bar-border: #1f242b;
+$bar-radius: 12px;
 $bar-padding-vertical: 4px;
 $bar-padding-horizontal: 8px;
-$widget-margin-horizontal: 4px;
-$widget-padding-vertical: 4px;
-$widget-padding-horizontal: 12px;
+$bar-shadow: $shadow-lg;
 
-// DASHBOARD SPECIFIC
-$dashboard-btn-margin-right: 12px; // Adds gap between toggle and workspaces
+// Dashboard (REQUIRED by _dashboard.scss)
+$dashboard-btn-margin-right: 12px;
 $dashboard-border-color: $border-color-normal;
 $dashboard-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
 
-// TYPOGRAPHY
-$font-family-primary: "CodeNewRoman Nerd Font", "JetBrains Mono", monospace;
-$font-size-xs: 10px;
-$font-size-sm: 11px;
-$font-size-md: 13px;
-$font-size-lg: 14px;
-$font-size-xl: 16px;
-$font-weight-normal: 400;
-$font-weight-medium: 500;
-$font-weight-bold: 700;
-$line-height-tight: 1.2;
-$line-height-normal: 1.5;
-$line-height-relaxed: 1.7;
+// Time Widget (REQUIRED by _time.scss)
+$time-bg: $bg-elevated;
+$time-border: $border-color-normal;
+$time-border-hover: $accent-primary-dim;
+$time-shadow-hover: $glow-size-sm $glow-primary-subtle;
+$time-text-color: $accent-primary-bright;
+$time-text-size: 16px; // $font-size-xl
+$time-text-weight: 700; // bold
+$date-text-color: $accent-primary-bright;
+$date-text-size: 13px; // $font-size-md
+$date-text-weight: 500; // medium
 
-// TRANSITIONS
-$transition-timing: ease;
-$transition-timing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-$transition-fast: 150ms $transition-timing;
-$transition-normal: 250ms $transition-timing;
-$transition-slow: 350ms $transition-timing;
-$transition-smooth: 300ms $transition-timing-smooth;
+// Workspace (REQUIRED by _workspace.scss)
+$workspace-bg-default: $bg-elevated;
+$workspace-bg-active: $gradient-primary;
+$workspace-bg-hover: $bg-overlay;
 
-// STYLE MODE
-$style-mode: "bubble";
-$widget-bg-enabled: true;
-$widget-border-enabled: true;
-$widget-shadow-enabled: true;
-$widget-use-separators: false;
+$workspace-text-default: $fg-secondary;
+$workspace-text-occupied: $accent-primary;
+$workspace-text-active: $text-on-accent;
+$workspace-text-urgent: $accent-red-bright;
+
+$workspace-border-default: $border-color-normal;
+$workspace-border-occupied: $accent-primary-dim;
+$workspace-border-active: $accent-primary-bright;
+$workspace-border-urgent: $accent-red-bright;
+
+$workspace-shadow-default: none;
+$workspace-shadow-active: $glow-size-md $glow-primary;
+$workspace-shadow-hover: $glow-size-sm $glow-primary-subtle;
+$workspace-shadow-urgent: $glow-size-sm $glow-red;
+
+$workspace-min-size: 28px;
 $workspace-active-border-style: "full";
+$workspace-separator-margin: 4px;
 
-// COMPONENT SCALES
-$icon-size-sm: 14px;
-$icon-size-md: 16px;
-$icon-size-lg: 20px;
+// Section
+$section-padding-x: 8px;
+$section-padding-y: 4px;
+$section-min-height: 28px;
+
+// Separators
+$separator-color: transparent;
+$separator-width: 0px;
+$separator-height: 0px;
+$separator-margin: 6px;
+
+// Scales
 $scale-width: 6px;
 $scale-height: 10px;
 $scale-trough-bg: rgba($fg-dim, 0.3);
@@ -200,31 +258,33 @@ $scale-radius: 6px;
 $scale-border: none;
 $scale-glow: none;
 
-// BAR CONFIG
-$bar-bg: rgba(10, 14, 20, 0.95);
-$bar-border: #1f242b;
-$bar-radius: 12px;
-$bar-padding-x: 4px;
-$bar-padding-y: 4px;
-$bar-shadow: $shadow-lg;
+// Icons
+$icon-size-sm: 14px;
+$icon-size-md: 16px;
+$icon-size-lg: 20px;
 
-$section-padding-x: 8px;
-$section-padding-y: 4px;
-$section-min-height: 28px;
+// ============================================================================
+// 5. MISC & TYPOGRAPHY
+// ============================================================================
 
-// COMPONENT OVERRIDES
-$workspace-bg-default: $bg-elevated;
-$workspace-bg-active: $gradient-primary;
-$workspace-radius: 12px;
-$workspace-min-size: 28px;
+$style-mode: "bubble";
+$widget-bg-enabled: true;
+$widget-border-enabled: true;
+$widget-shadow-enabled: true;
+$widget-use-separators: false;
 
-$separator-color: transparent;
-$separator-width: 0px;
-$separator-height: 0px;
-$separator-margin: 6px;
-$workspace-separator-margin: 4px;
+$font-family-primary: "CodeNewRoman Nerd Font", "JetBrains Mono", monospace;
+$font-size-xs: 10px;
+$font-size-sm: 11px;
+$font-size-md: 13px;
+$font-size-lg: 14px;
+$font-size-xl: 16px;
 
-// LEGACY ALIASES
+$transition-timing: ease;
+$transition-fast: 150ms $transition-timing;
+$transition-normal: 250ms $transition-timing;
+
+// Legacy Aliases
 $accent-orange: $accent-primary;
 $accent-orange-bright: $accent-primary-bright;
 $accent-orange-dim: $accent-primary-dim;

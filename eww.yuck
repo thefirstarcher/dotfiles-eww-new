@@ -1,22 +1,17 @@
 ;; ============================================================================
 ;; EWW MAIN CONFIGURATION
 ;; ============================================================================
-;; Modular, DRY-compliant widget system
-;; All configuration in config.yuck, all styling in eww.scss
-
-;; Import centralized configuration
 (include "./config.yuck")
 
 ;; ============================================================================
 ;; WINDOWS
 ;; ============================================================================
 
-;; Main bar window - configure position/size below
 (defwindow bar
   :monitor 0
   :geometry (geometry
     :x "0"
-    :y "5"
+    :y "5px"
     :width "1910px"
     :height "42px"
     :anchor "top center")
@@ -29,14 +24,14 @@
 (defwindow dashboard
   :monitor 0
   :geometry (geometry
-    :x "10"
-    :y "55px"     ;; MOVED UP: Closer to bar (42px bar + 5px offset + 8px gap)
+    :x "10px"
+    :y "60px"
     :width "350px"
     :height "500px"
     :anchor "top left")
   :stacking "overlay"
   :exclusive false
-  ;; WRAPPER: Auto-close when mouse leaves the dashboard area
+  ;; Auto-close when mouse leaves the dashboard
   (eventbox
     :onhoverlost "eww close dashboard && eww update show-dashboard=false"
     (dashboard_layout))
@@ -46,13 +41,14 @@
 ;; LAYOUTS
 ;; ============================================================================
 
-;; Main bar layout - three sections with centered time
 (defwidget bar_layout []
   (centerbox
     :class "bar_layout"
     :orientation "h"
     (section :halign "start" :class "left_layout"
       (dashboard-toggle-button)
+      ;; FIX: Separator ensures consistent spacing between button and workspaces
+      (mini-separator)
       (conditional-widget :condition show-workspaces
         (workspaces))
       (conditional-widget :condition show-window-title
@@ -97,7 +93,6 @@
   )
 )
 
-;; Reusable section container
 (defwidget section [halign class]
   (box
     :orientation "h"
@@ -109,7 +104,6 @@
   )
 )
 
-;; Conditional widget wrapper - only renders if condition is true
 (defwidget conditional-widget [condition]
   (box
     :visible condition
@@ -117,19 +111,27 @@
   )
 )
 
-;; Minimal separator - thin vertical line
-;; Always rendered but styled invisible in full themes
 (defwidget mini-separator []
-  (box
-    :class "separator"
-  )
+  (box :class "separator")
 )
 
 ;; ============================================================================
 ;; COMPONENTS
 ;; ============================================================================
 
-;; Workspaces widget - compact, no repetition
+;; Dashboard toggle button (in bar)
+(defwidget dashboard-toggle-button []
+  (eventbox
+    ;; Use script to check window state (fixes double-click issue)
+    :onclick "~/.config/eww/scripts/toggle-dashboard.sh"
+    :cursor "pointer"
+    :tooltip "Toggle Dashboard"
+    (button
+      :class "dashboard-toggle ${show-dashboard ? 'active' : ''}"
+      "󰍜")
+  )
+)
+
 (defwidget workspaces []
   (box
     :orientation "h"
@@ -140,15 +142,12 @@
         :orientation "h"
         :space-evenly false
         (workspace-button :ws ws)
-        (box
-          :class "workspace-separator"
-        )
+        (box :class "workspace-separator")
       )
     )
   )
 )
 
-;; Single workspace button - encapsulated logic
 (defwidget workspace-button [ws]
   (button
     :class "workspace ${ws.focused ? 'active' : ''}${ws.urgent ? ' urgent' : ''}${ws.visible && !ws.focused ? ' occupied' : ''}"
@@ -157,7 +156,6 @@
   )
 )
 
-;; Window title widget - shows focused window title
 (defwidget window-title-widget []
   (box
     :class "window-title-applet"
@@ -172,7 +170,6 @@
   )
 )
 
-;; Time widget - toggles between time and date on click
 (defwidget time-widget []
   (eventbox
     :onclick "eww update time-show-time=${!time-show-time}"
@@ -190,7 +187,6 @@
   )
 )
 
-;; Weather widget - shows temperature and condition
 (defwidget weather-widget []
   (eventbox
     :onclick "xdg-open https://wttr.in"
@@ -202,19 +198,12 @@
       :halign "center"
       :space-evenly false
       :tooltip "${weather.condition}"
-      (label
-        :class "weather-icon"
-        :text "${weather.icon}")
-      (label
-        :class "weather-temp"
-        :text "${weather.temp}")
+      (label :class "weather-icon" :text "${weather.icon}")
+      (label :class "weather-temp" :text "${weather.temp}")
     )
   )
 )
 
-;; Pomodoro widget - timer for work/break sessions
-;; NOTE: For best performance, install inotify-tools package (provides inotifywait)
-;;       Without it, the widget will use polling which updates every 0.5s instead of instantly
 (defwidget pomodoro-widget []
   (eventbox
     :onclick "~/.config/eww/scripts/pomodoro.py toggle &"
@@ -228,17 +217,12 @@
       :halign "center"
       :space-evenly false
       :tooltip "Pomodoro timer"
-      (label
-        :class "pomodoro-icon"
-        :text "${pomodoro.icon}")
-      (label
-        :class "pomodoro-time"
-        :text "${pomodoro.time_display ?: '25:00'}")
+      (label :class "pomodoro-icon" :text "${pomodoro.icon}")
+      (label :class "pomodoro-time" :text "${pomodoro.time_display ?: '25:00'}")
     )
   )
 )
 
-;; Brightness widget - shows brightness level with scroll control
 (defwidget brightness-widget []
   (eventbox
     :onscroll "if [ '{}' = 'up' ]; then ~/.config/eww/scripts/brightness.sh up; else ~/.config/eww/scripts/brightness.sh down; fi"
@@ -249,35 +233,22 @@
       :spacing 15
       :space-evenly false
       :halign "center"
-      (label
-        :class "brightness-icon"
-        :text "${brightness.percent >= 80 ? '󰃠' : brightness.percent >= 50 ? '󰃟' : brightness.percent >= 20 ? '󰃞' : '󰃞'}")
-      (scale
-        :class "brightness-scale"
-        :value "${brightness.percent}"
-        :orientation "v"
-        :flipped true
-        :min 0
-        :max 100
-        :active false)
+      (label :class "brightness-icon" :text "${brightness.percent >= 80 ? '󰃠' : brightness.percent >= 50 ? '󰃟' : brightness.percent >= 20 ? '󰃞' : '󰃞'}")
+      (scale :class "brightness-scale" :value "${brightness.percent}" :orientation "v" :flipped true :min 0 :max 100 :active false)
     )
   )
 )
 
-;; Keyboard layout widget - shows current keyboard layout flag
 (defwidget keyboard-widget []
   (box
     :class "keyboard-applet"
     :orientation "h"
     :space-evenly true
     :tooltip "Keyboard: ${keyboard.layout}"
-    (label
-      :class "keyboard-flag"
-      :text "${keyboard.icon}")
+    (label :class "keyboard-flag" :text "${keyboard.icon}")
   )
 )
 
-;; Network widget - shows connection status
 (defwidget network-widget []
   (box
     :class "network-applet ${network.type}"
@@ -285,22 +256,11 @@
     :space-evenly true
     :spacing 15
     :tooltip "${network.name}"
-    (label
-      :class "network-icon"
-      :justify "center"
-      :text "${network.icon}")
-    (scale
-      :class "network-scale"
-      :value "${network.percent}"
-      :orientation "v"
-      :flipped true
-      :min 0
-      :max 100
-      :active false)
+    (label :class "network-icon" :justify "center" :text "${network.icon}")
+    (scale :class "network-scale" :value "${network.percent}" :orientation "v" :flipped true :min 0 :max 100 :active false)
   )
 )
 
-;; Bluetooth widget - shows bluetooth status
 (defwidget bluetooth-widget []
   (box
     :class "bluetooth-applet ${bluetooth.enabled ? 'enabled' : 'disabled'}${bluetooth.connected ? ' connected' : ''}"
@@ -308,13 +268,10 @@
     :spacing 6
     :space-evenly true
     :tooltip "${bluetooth.device != '' ? bluetooth.device : bluetooth.enabled ? 'Bluetooth enabled' : 'Bluetooth disabled'}"
-    (label
-      :class "bluetooth-icon"
-      :text "${bluetooth.connected ? '󰂱' : bluetooth.enabled ? '󰂯' : '󰂲'}")
+    (label :class "bluetooth-icon" :text "${bluetooth.connected ? '󰂱' : bluetooth.enabled ? '󰂯' : '󰂲'}")
   )
 )
 
-;; Microphone widget - shows microphone level with scroll control and real-time input level
 (defwidget microphone-widget []
   (eventbox
     :onscroll "if [ '{}' = 'up' ]; then ~/.config/eww/scripts/microphone.sh up; else ~/.config/eww/scripts/microphone.sh down; fi"
@@ -325,32 +282,15 @@
       :orientation "h"
       :spacing 10
       :space-evenly true
-      (label
-        :class "microphone-icon"
-        :text "${microphone.muted ? '󰍭' : microphone.percent >= 70 ? '󰍬' : microphone.percent >= 30 ? '󰍬' : microphone.percent > 0 ? '󰍬' : '󰍭'}")
+      (label :class "microphone-icon" :text "${microphone.muted ? '󰍭' : microphone.percent >= 70 ? '󰍬' : microphone.percent >= 30 ? '󰍬' : microphone.percent > 0 ? '󰍬' : '󰍭'}")
       (overlay
-        (scale
-          :class "microphone-scale"
-          :value "${microphone.percent}"
-          :orientation "v"
-          :flipped true
-          :min 0
-          :max 100
-          :active false)
-        (scale
-          :class "input-level-scale"
-          :value "${microphone.level}"
-          :orientation "v"
-          :flipped true
-          :min 0
-          :max 100
-          :active false)
+        (scale :class "microphone-scale" :value "${microphone.percent}" :orientation "v" :flipped true :min 0 :max 100 :active false)
+        (scale :class "input-level-scale" :value "${microphone.level}" :orientation "v" :flipped true :min 0 :max 100 :active false)
       )
     )
   )
 )
 
-;; Volume widget - shows volume percentage with scroll control and real-time audio level
 (defwidget volume-widget []
   (eventbox
     :onscroll "if [ '{}' = 'up' ]; then ~/.config/eww/scripts/volume.sh up; else ~/.config/eww/scripts/volume.sh down; fi"
@@ -361,54 +301,27 @@
       :orientation "h"
       :spacing 10
       :space-evenly true
-      (label
-        :class "volume-icon"
-        :text "${volume.muted ? '󰖁' : volume.percent >= 70 ? '󰕾' : volume.percent >= 30 ? '󰖀' : volume.percent > 0 ? '󰕿' : '󰖁'}")
+      (label :class "volume-icon" :text "${volume.muted ? '󰖁' : volume.percent >= 70 ? '󰕾' : volume.percent >= 30 ? '󰖀' : volume.percent > 0 ? '󰕿' : '󰖁'}")
       (overlay
-        (scale
-          :class "volume-scale"
-          :value "${volume.percent}"
-          :orientation "v"
-          :flipped true
-          :min 0
-          :max 100
-          :active false)
-        (scale
-          :class "audio-level-scale"
-          :value "${volume.level}"
-          :orientation "v"
-          :flipped true
-          :min 0
-          :max 100
-          :active false)
+        (scale :class "volume-scale" :value "${volume.percent}" :orientation "v" :flipped true :min 0 :max 100 :active false)
+        (scale :class "audio-level-scale" :value "${volume.level}" :orientation "v" :flipped true :min 0 :max 100 :active false)
       )
     )
   )
 )
 
-;; Battery widget - shows battery percentage and status
 (defwidget battery-widget []
   (box
     :class "battery-applet ${battery.status == 'Charging' ? 'charging' : ''}${battery.percent <= 20 ? ' low' : ''}"
     :orientation "h"
     :spacing 10
     :space-evenly true
-    :tooltip "Battery: ${battery.percent}% | ${battery.status}${battery.time != '' ? ' | ' + battery.time : ''} | Health: ${battery.health}% | Power: ${battery.power}W | Temp: ${battery.temp}°C | Cycles: ${battery.cycles} | Voltage: ${battery.voltage} | Design: ${battery.design_capacity} | Current: ${battery.current_capacity}"
-    (label
-      :class "battery-icon"
-      :text "${battery.icon}")
-    (scale
-      :class "battery-scale"
-      :value "${battery.percent}"
-      :orientation "v"
-      :flipped true
-      :min 0
-      :max 100
-      :active false)
+    :tooltip "Battery: ${battery.percent}% | ${battery.status}${battery.time != '' ? ' | ' + battery.time : ''} | Health: ${battery.health}% | Power: ${battery.power}W | Temp: ${battery.temp}°C"
+    (label :class "battery-icon" :text "${battery.icon}")
+    (scale :class "battery-scale" :value "${battery.percent}" :orientation "v" :flipped true :min 0 :max 100 :active false)
   )
 )
 
-;; Notifications widget - shows notification count
 (defwidget notifications-widget []
   (box
     :class "notifications-applet ${notifications.dnd ? 'dnd' : ''}${notifications.count > 0 ? ' has-notifications' : ''}"
@@ -416,13 +329,8 @@
     :spacing 10
     :space-evenly true
     :tooltip "${notifications.dnd ? 'Do Not Disturb' : notifications.count > 0 ? notifications.count + ' notification' + (notifications.count > 1 ? 's' : '') : 'No notifications'}"
-    (label
-      :class "notifications-icon"
-      :text "${notifications.dnd ? '󰂛' : notifications.count > 0 ? '󰂚' : '󰂜'}")
-    (label
-      :class "notifications-count"
-      :visible "${notifications.count > 0}"
-      :text "${notifications.count}")
+    (label :class "notifications-icon" :text "${notifications.dnd ? '󰂛' : notifications.count > 0 ? '󰂚' : '󰂜'}")
+    (label :class "notifications-count" :visible "${notifications.count > 0}" :text "${notifications.count}")
   )
 )
 
@@ -430,24 +338,12 @@
 ;; DASHBOARD COMPONENTS
 ;; ============================================================================
 
-;; Dashboard toggle button (in bar)
-(defwidget dashboard-toggle-button []
-  (eventbox
-    :onclick "eww open --toggle dashboard && eww update show-dashboard=${!show-dashboard}"
-    :cursor "pointer"
-    :tooltip "Toggle Dashboard"
-    (button :class "dashboard-toggle ${show-dashboard ? 'active' : ''}" "󰍜")
-  )
-)
-
-;; Dashboard layout
 (defwidget dashboard_layout []
   (box
     :class "dashboard-container"
     :orientation "v"
     :space-evenly false
     :spacing 12
-    ;; OVERLAY: Allows placing the close button on top of the content
     (overlay
       (box
         :orientation "v"
@@ -467,33 +363,19 @@
   )
 )
 
-;; User info widget - username and uptime
 (defwidget user-info-widget []
   (box
     :class "user-info-applet"
     :orientation "v"
     :space-evenly false
     :spacing 0
-    (label
-      :class "username"
-      :text "${user_info.username}"
-      :halign "start")
-    (label
-      :class "uptime-days"
-      :text "${user_info.uptime_days}"
-      :halign "start")
-    (label
-      :class "uptime-hours"
-      :text "${user_info.uptime_hours}"
-      :halign "start")
-    (label
-      :class "uptime-minutes"
-      :text "${user_info.uptime_minutes}"
-      :halign "start")
+    (label :class "username" :text "${user_info.username}" :halign "start")
+    (label :class "uptime-days" :text "${user_info.uptime_days}" :halign "start")
+    (label :class "uptime-hours" :text "${user_info.uptime_hours}" :halign "start")
+    (label :class "uptime-minutes" :text "${user_info.uptime_minutes}" :halign "start")
   )
 )
 
-;; Music player widget - MPRIS control
 (defwidget music-player-widget []
   (box
     :class "music-player-applet"
@@ -518,33 +400,40 @@
           :space-evenly false
           :halign "center"
           :valign "center"
-          ;; Left Switcher: Cycle to Previous Player
-          (button
-            :class "app-switcher-left"
-            :onclick "~/.config/eww/scripts/music-control.sh prev_player"
-            :visible "${arraylength(music.available_players) > 1}"
-            "")
+          (button :class "app-switcher-left" :onclick "~/.config/eww/scripts/music-control.sh prev_player" :visible "${arraylength(music.available_players) > 1}" "")
 
           ;; Album Art (Background Image for cropping)
           (box :class "album-art" :visible "${music.art_url != ''}" :style "background-image: url('${music.art_url}');")
           (box :class "album-art-placeholder" :visible "${music.art_url == ''}" (label :text "" :class "placeholder-icon"))
 
-          ;; Right Switcher: Cycle to Next Player
-          (button
-            :class "app-switcher-right"
-            :onclick "~/.config/eww/scripts/music-control.sh next_player"
-            :visible "${arraylength(music.available_players) > 1}"
-            "")
+          (button :class "app-switcher-right" :onclick "~/.config/eww/scripts/music-control.sh next_player" :visible "${arraylength(music.available_players) > 1}" "")
         )
         (label :class "player-name" :text "${music.active_player}" :limit-width 15 :halign "center")
       )
-      ;; Right: Controls
+      ;; Right: Controls & Seek
       (box
         :class "player-right-section"
         :orientation "v"
         :space-evenly false
         :valign "center"
-        (scale :class "seek-bar" :value "${music.position_percent}" :onchange "~/.config/eww/scripts/music-control.sh seek {}" :min 0 :max 100)
+        ;; Seek Bar (FIX: Use fallback to 0 to prevent 50% reset issue)
+        (scale
+          :class "seek-bar"
+          :value "${music.position_percent ?: 0}"
+          :onchange "~/.config/eww/scripts/music-control.sh seek {}"
+          :min 0
+          :max 100)
+
+        ;; Time Display (Below seek bar)
+        (box
+          :class "player-time-labels"
+          :orientation "h"
+          :space-evenly true
+          (label :class "time-current" :text "${music.position_time ?: '0:00'}" :halign "start")
+          (label :class "time-total" :text "${music.duration_time ?: '0:00'}" :halign "end")
+        )
+
+        ;; Controls
         (box
           :class "player-controls"
           :orientation "h"

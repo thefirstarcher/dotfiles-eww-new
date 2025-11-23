@@ -2,11 +2,10 @@
 // DASHBOARD COMPONENT
 // ============================================================================
 
-// Dashboard container - sleek and theme-compliant
+// Dashboard container
 .dashboard-container {
   background: $gradient-bg-overlay;
 
-  // Theme-aware border (defined in theme file)
   @if $widget-border-enabled {
     border: $border-width-normal solid $dashboard-border-color;
   }
@@ -43,12 +42,7 @@
 // Toggle button (in bar)
 .dashboard-toggle {
   padding: $widget-padding-vertical $widget-padding-horizontal;
-
-  // Use the standard widget margin for consistent spacing
-  margin-right: $widget-margin-horizontal;
-  margin-left: 0;
-  margin-top: 0;
-  margin-bottom: 0;
+  margin: 0;
 
   border-radius: $applet-radius;
   min-width: $workspace-min-size;
@@ -92,10 +86,7 @@
   }
 }
 
-// ============================================================================
-// USER INFO WIDGET
-// ============================================================================
-
+// ... User Info ...
 .user-info-applet {
   padding: $space-md;
   background: $bg-elevated;
@@ -114,7 +105,6 @@
     color: $accent-primary-bright;
     margin-bottom: $space-sm;
   }
-
   .uptime-days,
   .uptime-hours,
   .uptime-minutes {
@@ -124,10 +114,7 @@
   }
 }
 
-// ============================================================================
-// MUSIC PLAYER WIDGET
-// ============================================================================
-
+// ... Music Player ...
 .music-player-applet {
   padding: $space-md;
   background: $bg-elevated;
@@ -149,7 +136,7 @@ $album-size: 120px;
   margin: $space-sm 0;
 }
 
-// SWITCHERS: SEAMLESS INTEGRATION
+// SWITCHERS
 .app-switcher-left,
 .app-switcher-right {
   min-width: 12px;
@@ -169,16 +156,12 @@ $album-size: 120px;
   }
 }
 
-// Left Button: Gradient from Color (Left) to Black (Right)
-// Flat right side to join with image seamlessy
 .app-switcher-left {
   background: linear-gradient(to right, $accent-primary-dim, #000000);
   border-radius: $radius-sm 0 0 $radius-sm;
   margin-right: 0;
 }
 
-// Right Button: Gradient from Black (Left) to Color (Right)
-// Flat left side to join with image seamlessy
 .app-switcher-right {
   background: linear-gradient(to right, #000000, $accent-primary-dim);
   border-radius: 0 $radius-sm $radius-sm 0;
@@ -189,16 +172,13 @@ $album-size: 120px;
 .album-art {
   min-width: $album-size;
   min-height: $album-size;
-  border-radius: 0; // Flat sides for seamless join
+  border-radius: 0;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
-  // Inset shadow creates the "shaded to sides" effect blending into the black buttons
   box-shadow:
     inset 15px 0 20px -10px rgba(0, 0, 0, 0.9),
     inset -15px 0 20px -10px rgba(0, 0, 0, 0.9);
-
   @if $widget-border-enabled {
     border-top: $border-width-thin solid $border-color-bright;
     border-bottom: $border-width-thin solid $border-color-bright;
@@ -232,11 +212,12 @@ $album-size: 120px;
   min-width: 140px;
 }
 
+// Seek Bar - DOT REMOVED
 .seek-bar {
-  margin-bottom: $space-lg;
+  margin-bottom: 4px; // Reduced margin to fit time labels close
 
   trough {
-    min-height: 4px;
+    min-height: 6px;
     background: $bg-tertiary;
     border-radius: $radius-full;
   }
@@ -246,21 +227,31 @@ $album-size: 120px;
     border-radius: $radius-full;
   }
 
+  // SLIDER HIDDEN BUT INTERACTIVE
   slider {
     all: unset;
-    min-width: 10px;
-    min-height: 10px;
-    background: $fg-bright;
-    border-radius: 50%;
-    margin: -3px 0;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
-    transition: all $transition-fast;
+    min-width: 1px; // Just enough to be technically present
+    min-height: 10px; // Height of touch area
+    background: transparent; // INVISIBLE
+    box-shadow: none; // NO SHADOW/DOT
+    border: none;
+    margin: -2px 0;
+  }
+}
 
-    &:hover {
-      min-width: 12px;
-      min-height: 12px;
-      margin: -4px 0;
-    }
+// Time Labels
+.player-time-labels {
+  margin-bottom: $space-sm;
+
+  .time-current,
+  .time-total {
+    font-size: 10px;
+    color: $fg-tertiary;
+    font-weight: bold;
+  }
+
+  .time-current {
+    color: $accent-primary-dim;
   }
 }
 
