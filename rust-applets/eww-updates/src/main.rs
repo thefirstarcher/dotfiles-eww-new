@@ -42,7 +42,7 @@ fn get_updates() -> Updates {
     let aur = count_aur_updates();
     let total = official + aur;
 
-    let icon = "\u{f0ed}".to_string(); //
+    let icon = "".to_string(); //
 
     Updates {
         official,
