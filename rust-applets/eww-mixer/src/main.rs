@@ -172,6 +172,30 @@ struct MixerState {
     source_outputs: Vec<SourceOutputInfo>,
 }
 
+/// Fast-updating state (volume levels, mute status, counts)
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
+struct FastState {
+    volume_percent: u8,
+    volume_muted: bool,
+    volume_level: u8,
+    mic_percent: u8,
+    mic_muted: bool,
+    mic_level: u8,
+    sink_count: usize,
+    sink_input_count: usize,
+    source_count: usize,
+    source_output_count: usize,
+}
+
+/// Slow-updating state (full device and application lists)
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
+struct SlowState {
+    sinks: Vec<SinkInfo>,
+    sink_inputs: Vec<SinkInputInfo>,
+    sources: Vec<SourceInfo>,
+    source_outputs: Vec<SourceOutputInfo>,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 enum DaemonResponse {
     Success,
@@ -212,7 +236,11 @@ struct PulseAudioActor {
     mainloop: Rc<RefCell<Mainloop>>,
     context: Rc<RefCell<Context>>,
     last_state: MixerState,
+    last_fast_state: FastState,
+    last_slow_state: SlowState,
     broadcast_tx: Option<std::sync::mpsc::Sender<MixerState>>,
+    fast_broadcast_tx: Option<std::sync::mpsc::Sender<FastState>>,
+    slow_broadcast_tx: Option<std::sync::mpsc::Sender<SlowState>>,
 
     // Sink monitoring
     monitor_stream: Option<Rc<RefCell<Stream>>>,
@@ -270,7 +298,11 @@ impl PulseAudioActor {
             mainloop: mainloop_rc,
             context: context_rc,
             last_state: MixerState::default(),
+            last_fast_state: FastState::default(),
+            last_slow_state: SlowState::default(),
             broadcast_tx: None,
+            fast_broadcast_tx: None,
+            slow_broadcast_tx: None,
             monitor_stream: None,
             peak_level: Arc::new(AtomicU8::new(0)),
 
@@ -872,14 +904,60 @@ impl PulseAudioActor {
         }
     }
 
+    /// Extract fast-changing state from full mixer state
+    fn extract_fast_state(state: &MixerState) -> FastState {
+        FastState {
+            volume_percent: state.volume_percent,
+            volume_muted: state.volume_muted,
+            volume_level: state.volume_level,
+            mic_percent: state.mic_percent,
+            mic_muted: state.mic_muted,
+            mic_level: state.mic_level,
+            sink_count: state.sinks.len(),
+            sink_input_count: state.sink_inputs.len(),
+            source_count: state.sources.len(),
+            source_output_count: state.source_outputs.len(),
+        }
+    }
+
+    /// Extract slow-changing state from full mixer state
+    fn extract_slow_state(state: &MixerState) -> SlowState {
+        SlowState {
+            sinks: state.sinks.clone(),
+            sink_inputs: state.sink_inputs.clone(),
+            sources: state.sources.clone(),
+            source_outputs: state.source_outputs.clone(),
+        }
+    }
+
     /// Broadcast state update to all listeners if changed
     fn broadcast_state_if_changed(&mut self) {
         let new_state = self.get_state();
+
+        // Always broadcast full state for backward compatibility
         if new_state != self.last_state {
             if let Some(tx) = &self.broadcast_tx {
                 let _ = tx.send(new_state.clone());
             }
-            self.last_state = new_state;
+            self.last_state = new_state.clone();
+        }
+
+        // Broadcast fast state if changed
+        let new_fast_state = Self::extract_fast_state(&new_state);
+        if new_fast_state != self.last_fast_state {
+            if let Some(tx) = &self.fast_broadcast_tx {
+                let _ = tx.send(new_fast_state.clone());
+            }
+            self.last_fast_state = new_fast_state;
+        }
+
+        // Broadcast slow state if changed
+        let new_slow_state = Self::extract_slow_state(&new_state);
+        if new_slow_state != self.last_slow_state {
+            if let Some(tx) = &self.slow_broadcast_tx {
+                let _ = tx.send(new_slow_state.clone());
+            }
+            self.last_slow_state = new_slow_state;
         }
     }
 
@@ -1148,6 +1226,16 @@ async fn main() -> anyhow::Result<()> {
                 std::sync::mpsc::Receiver<MixerState>,
             ) = std::sync::mpsc::channel();
 
+            let (fast_broadcast_tx, fast_broadcast_rx): (
+                std::sync::mpsc::Sender<FastState>,
+                std::sync::mpsc::Receiver<FastState>,
+            ) = std::sync::mpsc::channel();
+
+            let (slow_broadcast_tx, slow_broadcast_rx): (
+                std::sync::mpsc::Sender<SlowState>,
+                std::sync::mpsc::Receiver<SlowState>,
+            ) = std::sync::mpsc::channel();
+
             let (cmd_tx, cmd_rx): (
                 std::sync::mpsc::Sender<ActorCommand>,
                 std::sync::mpsc::Receiver<ActorCommand>,
@@ -1158,8 +1246,10 @@ async fn main() -> anyhow::Result<()> {
             // Spawn actor thread
             let _actor_handle = std::thread::spawn(move || {
                 let mut actor = PulseAudioActor::new().expect("Failed to create PulseAudio actor");
-                // Set the broadcast channel
+                // Set the broadcast channels
                 actor.broadcast_tx = Some(broadcast_tx);
+                actor.fast_broadcast_tx = Some(fast_broadcast_tx);
+                actor.slow_broadcast_tx = Some(slow_broadcast_tx);
                 actor.run_actor_loop(cmd_rx);
             });
 
@@ -1172,7 +1262,12 @@ async fn main() -> anyhow::Result<()> {
 
             match response_rx.recv_timeout(std::time::Duration::from_secs(2)) {
                 Ok(initial_state) => {
-                    println!("{}", serde_json::to_string(&initial_state)?);
+                    // Print initial states with prefixes
+                    let fast_state = PulseAudioActor::extract_fast_state(&initial_state);
+                    let slow_state = PulseAudioActor::extract_slow_state(&initial_state);
+
+                    println!("FAST:{}", serde_json::to_string(&fast_state)?);
+                    println!("SLOW:{}", serde_json::to_string(&slow_state)?);
                 }
                 Err(e) => {
                     eprintln!("Failed to get initial state: {}", e);
@@ -1180,10 +1275,17 @@ async fn main() -> anyhow::Result<()> {
                 }
             }
 
-            // Spawn stdout printer for state updates
+            // Spawn stdout printer for fast state updates
             tokio::task::spawn_blocking(move || {
-                while let Ok(state) = broadcast_rx.recv() {
-                    println!("{}", serde_json::to_string(&state).unwrap_or_default());
+                while let Ok(state) = fast_broadcast_rx.recv() {
+                    println!("FAST:{}", serde_json::to_string(&state).unwrap_or_default());
+                }
+            });
+
+            // Spawn stdout printer for slow state updates
+            tokio::task::spawn_blocking(move || {
+                while let Ok(state) = slow_broadcast_rx.recv() {
+                    println!("SLOW:{}", serde_json::to_string(&state).unwrap_or_default());
                 }
             });
 

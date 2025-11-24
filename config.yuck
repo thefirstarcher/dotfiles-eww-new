@@ -81,10 +81,21 @@
 
 ;; ============================================================================
 ;; UNIFIED MIXER - Handles both volume and microphone
+;; Split into fast and slow update streams for optimal performance
 ;; ============================================================================
-(deflisten mixer_state
-  :initial '{"volume_percent":0,"volume_muted":false,"volume_level":0,"sinks":[],"sink_inputs":[],"mic_percent":0,"mic_muted":false,"mic_level":0,"sources":[],"source_outputs":[]}'
-  "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer listen")
+
+;; Fast-updating state: volume/mic levels, mute status, device counts
+;; Updates frequently (50ms) for smooth visualizations
+;; (Daemon manager is started automatically by the listener scripts)
+(deflisten mixer_fast
+  :initial '{"volume_percent":0,"volume_muted":false,"volume_level":0,"mic_percent":0,"mic_muted":false,"mic_level":0,"sink_count":0,"sink_input_count":0,"source_count":0,"source_output_count":0}'
+  "~/.config/eww/scripts/mixer-fast-listener.sh")
+
+;; Slow-updating state: full device and application lists
+;; Only updates when devices are added/removed or properties change
+(deflisten mixer_slow
+  :initial '{"sinks":[],"sink_inputs":[],"sources":[],"source_outputs":[]}'
+  "~/.config/eww/scripts/mixer-slow-listener.sh")
 
 (defpoll network
   :interval "5s"
