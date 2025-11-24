@@ -1,5 +1,7 @@
 use reqwest::blocking::Client;
 use serde::Serialize;
+use std::thread;
+use std::time::Duration;
 
 #[derive(Serialize)]
 struct Weather {
@@ -31,28 +33,71 @@ fn get_icon_from_condition(condition: &str, icon_raw: &str) -> String {
     }
 }
 
-fn fetch_weather() -> Weather {
+/// Check if internet is available by pinging a reliable host
+fn check_internet() -> bool {
     let client = Client::builder()
-        .timeout(std::time::Duration::from_secs(5))
+        .timeout(Duration::from_secs(3))
         .build()
         .unwrap();
 
-    match client.get("https://wttr.in/?format=%t|%C|%c").send() {
-        Ok(response) => {
-            if let Ok(data) = response.text() {
-                let parts: Vec<&str> = data.split('|').collect();
+    // Try multiple reliable hosts
+    let hosts = vec![
+        "https://www.google.com",
+        "https://1.1.1.1",
+        "https://8.8.8.8",
+    ];
 
-                if parts.len() >= 3 {
-                    let temp = parts[0].trim().to_string();
-                    let condition = parts[1].trim().to_string();
-                    let icon_raw = parts[2].trim();
-                    let icon = get_icon_from_condition(&condition, icon_raw);
+    for host in hosts {
+        if client.head(host).send().is_ok() {
+            return true;
+        }
+    }
+    false
+}
 
-                    return Weather { temp, condition, icon };
+fn fetch_weather_with_retry() -> Weather {
+    let client = Client::builder()
+        .timeout(Duration::from_secs(5))
+        .build()
+        .unwrap();
+
+    let max_retries = 10;
+    let mut retry_delay = Duration::from_secs(1);
+
+    for attempt in 0..max_retries {
+        match client.get("https://wttr.in/?format=%t|%C|%c").send() {
+            Ok(response) => {
+                if let Ok(data) = response.text() {
+                    let parts: Vec<&str> = data.split('|').collect();
+
+                    if parts.len() >= 3 {
+                        let temp = parts[0].trim().to_string();
+                        let condition = parts[1].trim().to_string();
+                        let icon_raw = parts[2].trim();
+                        let icon = get_icon_from_condition(&condition, icon_raw);
+
+                        return Weather {
+                            temp,
+                            condition,
+                            icon,
+                        };
+                    }
+                }
+            }
+            Err(e) => {
+                eprintln!("Weather fetch attempt {} failed: {}", attempt + 1, e);
+
+                // Only retry if we have internet connectivity and attempts remain
+                if attempt < max_retries - 1 && check_internet() {
+                    eprintln!("Internet is available, retrying after {:?}...", retry_delay);
+                    thread::sleep(retry_delay);
+                    retry_delay *= 2; // Exponential backoff
+                } else if !check_internet() {
+                    eprintln!("No internet connection detected");
+                    break;
                 }
             }
         }
-        Err(_) => {}
     }
 
     Weather {
@@ -63,6 +108,6 @@ fn fetch_weather() -> Weather {
 }
 
 fn main() {
-    let weather = fetch_weather();
+    let weather = fetch_weather_with_retry();
     println!("{}", serde_json::to_string(&weather).unwrap());
 }
