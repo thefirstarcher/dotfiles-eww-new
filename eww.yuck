@@ -278,25 +278,33 @@
 )
 
 (defwidget network-widget []
-  (box
-    :class "network-applet ${network.type}"
-    :orientation "h"
-    :space-evenly true
-    :spacing 15
-    :tooltip "${network.name}"
-    (label :class "network-icon" :justify "center" :text "${network.icon}")
-    (scale :class "network-scale" :value "${network.percent}" :orientation "v" :flipped true :min 0 :max 100 :active false)
+  (eventbox
+    :onclick "rfkill toggle wifi &"
+    :cursor "pointer"
+    (box
+      :class "network-applet ${network.type}"
+      :orientation "h"
+      :space-evenly true
+      :spacing 15
+      :tooltip "${network.name}"
+      (label :class "network-icon" :justify "center" :text "${network.icon}")
+      (scale :class "network-scale" :value "${network.percent}" :orientation "v" :flipped true :min 0 :max 100 :active false)
+    )
   )
 )
 
 (defwidget bluetooth-widget []
-  (box
-    :class "bluetooth-applet ${bluetooth.enabled ? 'enabled' : 'disabled'}${bluetooth.connected ? ' connected' : ''}"
-    :orientation "h"
-    :spacing 6
-    :space-evenly true
-    :tooltip "${bluetooth.device != '' ? bluetooth.device : bluetooth.enabled ? 'Bluetooth enabled' : 'Bluetooth disabled'}"
-    (label :class "bluetooth-icon" :text "${bluetooth.connected ? '󰂱' : bluetooth.enabled ? '󰂯' : '󰂲'}")
+  (eventbox
+    :onclick "rfkill toggle bluetooth &"
+    :cursor "pointer"
+    (box
+      :class "bluetooth-applet ${bluetooth.enabled ? 'enabled' : 'disabled'}${bluetooth.connected ? ' connected' : ''}"
+      :orientation "h"
+      :spacing 6
+      :space-evenly true
+      :tooltip "${bluetooth.device != '' ? bluetooth.device : bluetooth.enabled ? 'Bluetooth enabled' : 'Bluetooth disabled'}"
+      (label :class "bluetooth-icon" :text "${bluetooth.connected ? '󰂱' : bluetooth.enabled ? '󰂯' : '󰂲'}")
+    )
   )
 )
 
@@ -424,14 +432,18 @@
 )
 
 (defwidget notifications-widget []
-  (box
-    :class "notifications-applet ${notifications.dnd ? 'dnd' : ''}${notifications.count > 0 ? ' has-notifications' : ''}"
-    :orientation "h"
-    :spacing 10
-    :space-evenly true
-    :tooltip "${notifications.dnd ? 'Do Not Disturb' : notifications.count > 0 ? notifications.count + ' notification' + (notifications.count > 1 ? 's' : '') : 'No notifications'}"
-    (label :class "notifications-icon" :text "${notifications.dnd ? '󰂛' : notifications.count > 0 ? '󰂚' : '󰂜'}")
-    (label :class "notifications-count" :visible "${notifications.count > 0}" :text "${notifications.count}")
+  (eventbox
+    :onclick "swaync-client -t &"
+    :cursor "pointer"
+    (box
+      :class "notifications-applet ${notifications.dnd ? 'dnd' : ''}${notifications.count > 0 ? ' has-notifications' : ''}"
+      :orientation "h"
+      :spacing 10
+      :space-evenly true
+      :tooltip "${notifications.dnd ? 'Do Not Disturb' : notifications.count > 0 ? notifications.count + ' notification' + (notifications.count > 1 ? 's' : '') : 'No notifications'}"
+      (label :class "notifications-icon" :text "${notifications.dnd ? '󰂛' : notifications.count > 0 ? '󰂚' : '󰂜'}")
+      (label :class "notifications-count" :visible "${notifications.count > 0}" :text "${notifications.count}")
+    )
   )
 )
 

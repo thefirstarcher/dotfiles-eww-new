@@ -1,2 +1,3 @@
 rust-applets/**/target/
 rust-applets/**/Cargo.lock
+.task/

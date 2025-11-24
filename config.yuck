@@ -120,7 +120,7 @@
 
 (defpoll updates
   :interval "1800s"
-  :initial '{"official": 0, "aur": 0, "total": 0, "icon": ""}'
+  :initial '{"official": 0, "aur": 0, "total": 0, "icon": ""}'
   "~/.config/eww/rust-applets/eww-updates/target/release/eww-updates")
 
 ;; ============================================================================
