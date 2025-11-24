@@ -195,7 +195,7 @@
 }
 
 .mixer-volume-slider {
-  margin-top: 4px;
+  /* No margin-top here anymore. Spacing is handled by parent `box :spacing 4`. */
 
   trough {
     min-height: 6px;
@@ -215,7 +215,11 @@
     background: $accent-primary-bright;
     border-radius: 50%;
     box-shadow: 0 0 6px $accent-primary;
-    margin: -3px 0;
+    /* Explicit margin to center 12px slider over 6px trough */
+    margin-top: -3px;
+    margin-bottom: -3px;
+    margin-left: 0;
+    margin-right: 0;
   }
 
   &.over-limit {
@@ -249,5 +253,57 @@
     @if $widget-shadow-enabled {
       box-shadow: $glow-size-sm $glow-primary;
     }
+  }
+}
+
+// ============================================================================
+// SINK AUDIO LEVEL SCALE (CRITICAL FIXES FOR INTERACTION)
+// ============================================================================
+// Visual peak audio level indicator for sinks (output devices)
+
+.sink-audio-level-scale {
+  all: unset;
+
+  trough {
+    all: unset;
+    background-color: transparent;
+    min-height: 6px;
+  }
+
+  highlight {
+    background: rgba($accent-primary-bright, 0.4);
+    border-radius: $radius-full;
+  }
+
+  slider {
+    all: unset;
+    min-height: 0;
+    min-width: 0;
+  }
+}
+
+// ============================================================================
+// APP AUDIO LEVEL SCALE (CRITICAL FIXES FOR INTERACTION)
+// ============================================================================
+// Visual peak audio level indicator for sink inputs (applications)
+
+.app-audio-level-scale {
+  all: unset;
+
+  trough {
+    all: unset;
+    background-color: transparent;
+    min-height: 6px;
+  }
+
+  highlight {
+    background: rgba($accent-green-bright, 0.4);
+    border-radius: $radius-full;
+  }
+
+  slider {
+    all: unset;
+    min-height: 0;
+    min-width: 0;
   }
 }

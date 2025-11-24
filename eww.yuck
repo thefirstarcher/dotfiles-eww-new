@@ -340,7 +340,7 @@
           :flipped true
           :min 0
           :max 100
-          :value "${mixer_state.volume_level}"
+          :value "${mixer_state.volume_level / 100 * mixer_state.volume_percent}"
           :active false)
       )
     )
@@ -387,7 +387,7 @@
           :flipped true
           :min 0
           :max 100
-          :value "${mixer_state.mic_level}"
+          :value "${mixer_state.mic_level / 100 * mixer_state.mic_percent}"
           :active false)
       )
     )
@@ -517,22 +517,35 @@
       (label :class "mixer-name" :text "${sink.description}" :limit-width 30 :halign "start")
       (label :class "mixer-volume-text ${sink.volume > 100 ? 'over-limit' : ''}" :text "${sink.volume}%" :halign "end")
     )
-    (scale
-      :class "mixer-volume-slider ${sink.volume > 100 ? 'over-limit' : ''}"
-      :value "${sink.volume}"
-      :min 0
-      :max 150
-      :onchange "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-volume sink ${sink.index} $(printf %.0f {})"
+    (overlay
+      ;; 1. Live audio level bar (Bottom layer - VISUAL ONLY)
+      (scale
+        :class "sink-audio-level-scale"
+        :value "${sink.is_default ? mixer_state.volume_level / 100 * sink.volume : 0}"
+        :min 0
+        :max 150
+        :active false
+      )
+      ;; 2. Volume slider (Top layer - INTERACTIVE)
+      (scale
+        :class "mixer-volume-slider ${sink.volume > 100 ? 'over-limit' : ''}"
+        :value "${sink.volume}"
+        :min 0
+        :max 150
+        :onchange "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-volume sink ${sink.index} $(printf %.0f {})"
+      )
     )
     (box
       :visible "${!sink.is_default}"
       :halign "end"
-      (eventbox
-        :cursor "pointer"
-        (button
-          :class "set-default-btn"
-          :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-default sink \"${sink.name}\""
-          "Set as Default")
+      (box ; <--- FIX: Isolate the button scope to prevent blinking on refresh
+        (eventbox
+          :cursor "pointer"
+          (button
+            :class "set-default-btn"
+            :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-default sink \"${sink.name}\""
+            "Set as Default")
+        )
       )
     )
   )
@@ -556,12 +569,23 @@
       (label :class "mixer-name" :text "${app.name}" :limit-width 30 :halign "start")
       (label :class "mixer-volume-text ${app.volume > 100 ? 'over-limit' : ''}" :text "${app.volume}%" :halign "end")
     )
-    (scale
-      :class "mixer-volume-slider ${app.volume > 100 ? 'over-limit' : ''}"
-      :value "${app.volume}"
-      :min 0
-      :max 150
-      :onchange "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-volume sink-input ${app.index} $(printf %.0f {})"
+    (overlay
+      ;; 1. Live audio level bar (Bottom layer - VISUAL ONLY)
+      (scale
+        :class "app-audio-level-scale"
+        :value "${mixer_state.volume_level / 100 * app.volume}"
+        :min 0
+        :max 150
+        :active false
+      )
+      ;; 2. Volume slider (Top layer - INTERACTIVE)
+      (scale
+        :class "mixer-volume-slider ${app.volume > 100 ? 'over-limit' : ''}"
+        :value "${app.volume}"
+        :min 0
+        :max 150
+        :onchange "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-volume sink-input ${app.index} $(printf %.0f {})"
+      )
     )
   )
 )
@@ -678,13 +702,23 @@
         :text "${source.volume}%"
         :halign "end")
     )
-    (scale
-      :class "mixer-volume-slider mic-slider ${source.volume > 100 ? 'over-limit' : ''}"
-      :value "${source.volume}"
-      :min 0
-      :max 150
-      :onchange "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-volume source ${source.index} $(printf %.0f {})"
-      :tooltip "Volume: ${source.volume}%"
+    (overlay
+      ;; 1. Live Input Level Bar (Bottom layer - VISUAL ONLY)
+      (scale
+        :class "source-audio-level-scale"
+        :value "${source.is_default ? mixer_state.mic_level / 100 * source.volume : 0}"
+        :min 0
+        :max 150
+        :active false
+      )
+      (scale
+        :class "mixer-volume-slider mic-slider ${source.volume > 100 ? 'over-limit' : ''}"
+        :value "${source.volume}"
+        :min 0
+        :max 150
+        :onchange "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-volume source ${source.index} $(printf %.0f {})"
+        :tooltip "Volume: ${source.volume}%"
+      )
     )
     (box
       :orientation "h"
@@ -700,13 +734,15 @@
       (box
         :visible "${!source.is_default}"
         :halign "end"
-        (eventbox
-          :cursor "pointer"
-          (button
-            :class "set-default-btn mic-set-default-btn"
-            :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-default source \"${source.name}\""
-            :tooltip "Make this the default input device"
-            "Set as Default")
+        (box ; <--- FIX: Isolate the button scope to prevent blinking on refresh
+          (eventbox
+            :cursor "pointer"
+            (button
+              :class "set-default-btn mic-set-default-btn"
+              :onclick "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-default source \"${source.name}\""
+              :tooltip "Make this the default input device"
+              "Set as Default")
+          )
         )
       )
     )
@@ -742,13 +778,24 @@
         :text "${app.volume}%"
         :halign "end")
     )
-    (scale
-      :class "mixer-volume-slider mic-slider ${app.volume > 100 ? 'over-limit' : ''}"
-      :value "${app.volume}"
-      :min 0
-      :max 150
-      :onchange "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-volume source-output ${app.index} $(printf %.0f {})"
-      :tooltip "Volume: ${app.volume}%"
+    (overlay
+      ;; 1. Live Input Level Bar (Bottom layer - VISUAL ONLY)
+      (scale
+        :class "output-audio-level-scale"
+        :value "${mixer_state.mic_level / 100 * app.volume}"
+        :min 0
+        :max 150
+        :active false
+      )
+      ;; 2. Volume slider (Top layer - INTERACTIVE)
+      (scale
+        :class "mixer-volume-slider mic-slider ${app.volume > 100 ? 'over-limit' : ''}"
+        :value "${app.volume}"
+        :min 0
+        :max 150
+        :onchange "~/.config/eww/rust-applets/eww-mixer/target/release/eww-mixer set-volume source-output ${app.index} $(printf %.0f {})"
+        :tooltip "Volume: ${app.volume}%"
+      )
     )
   )
 )

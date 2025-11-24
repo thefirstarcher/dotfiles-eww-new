@@ -4,7 +4,7 @@ version = "0.2.0"
 edition = "2021"
 
 [dependencies]
-libpulse-binding = "2.28"
+libpulse-binding = "2.30"
 libpulse-glib-binding = "2.28"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

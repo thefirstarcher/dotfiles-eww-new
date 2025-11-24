@@ -191,3 +191,53 @@
     }
   }
 }
+
+// ============================================================================
+// SOURCE INPUT LEVEL SCALE (Input Devices)
+// ============================================================================
+.source-audio-level-scale {
+  all: unset;
+
+  trough {
+    all: unset;
+    background-color: transparent;
+    min-height: 6px;
+  }
+
+  highlight {
+    background: rgba($accent-magenta-bright, 0.4);
+    border-radius: $radius-full;
+  }
+
+  slider {
+    all: unset;
+    min-height: 0;
+    min-width: 0;
+  }
+}
+
+// ============================================================================
+// SOURCE OUTPUT LEVEL SCALE (Recording Applications)
+// ============================================================================
+.output-audio-level-scale {
+  all: unset;
+
+  trough {
+    all: unset;
+    background-color: transparent;
+    min-height: 6px;
+  }
+
+  // Use a softer green accent for the recording apps, or magenta to match the mixer.
+  // Using Magenta here to match the mixer window theme.
+  highlight {
+    background: rgba($accent-magenta-bright, 0.4);
+    border-radius: $radius-full;
+  }
+
+  slider {
+    all: unset;
+    min-height: 0;
+    min-width: 0;
+  }
+}
