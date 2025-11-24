@@ -731,7 +731,7 @@ impl PulseAudioActor {
 
         if let Ok(Some(mut volumes)) = rx.recv() {
             self.mainloop.borrow_mut().lock();
-            let vol_value = (Volume::NORMAL.0 as f64 * percent.min(150) as f64 / 100.0) as u32;
+            let vol_value = (Volume::NORMAL.0 as f64 * percent.min(100) as f64 / 100.0) as u32;
             volumes.scale(Volume(vol_value));
 
             let mut introspect = self.context.borrow().introspect();
